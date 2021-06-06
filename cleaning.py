@@ -11,6 +11,7 @@ class GU_PT_clean_scene(Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "scene"
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
         self.layout.operator(GU_OT_clean_faulty_drivers.bl_idname)

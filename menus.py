@@ -19,6 +19,9 @@ from .collection import (
     GU_OT_destructively_join_meshes,
     get_collection_layers_from_collections,
 )
+from .property import(
+    GU_OT_property_copy,
+)
 
 
 def draw_new_mesh_objects(self, _):
@@ -33,10 +36,6 @@ def draw_custom_properties_ops(self, _):
     row.operator(GU_OT_remove_custom_props.bl_idname, text="", icon='TRASH')
 
 
-def draw_custom_props_links(self, _):
-    self.layout.operator(GU_OT_copy_custom_props.bl_idname, text="Link Custom Properties")
-
-
 def draw_toggle_render_object_context(self, _):
     self.layout.operator(GU_OT_toggle_object_render.bl_idname, text="Toggle Render")
 
@@ -45,8 +44,10 @@ def draw_print_mesh_count(self, _):
     self.layout.operator(GU_OT_print_highest_mesh_count.bl_idname)
 
 
-def draw_custom_props_material_links(self, context):
-    self.layout.operator(GU_OT_material_init_custom_props.bl_idname, text="Link Material Attributes")
+def draw_custom_props_links(self, context):
+    self.layout.operator(GU_OT_material_init_custom_props.bl_idname, text="Copy Material Attributes")
+    self.layout.operator(GU_OT_copy_custom_props.bl_idname, text="Copy Custom Properties")
+    self.layout.operator(GU_OT_property_copy.bl_idname, text="Copy ANY Property")
 
 
 def draw_boolean_collection_toggle(self, context):
@@ -77,7 +78,6 @@ def draw_collection_context(self, _):
 
 menus_appends = {
     bpy.types.VIEW3D_MT_make_links: draw_custom_props_links,
-    bpy.types.VIEW3D_MT_make_links: draw_custom_props_material_links,
     bpy.types.VIEW3D_MT_object_context_menu: draw_toggle_render_object_context,
     bpy.types.VIEW3D_MT_mesh_add: draw_new_mesh_objects,
     bpy.types.VIEW3D_MT_object_cleanup: draw_print_mesh_count,
