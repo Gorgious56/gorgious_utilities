@@ -3,6 +3,9 @@ from bpy.types import (
     Panel,
     Operator,
 )
+from bpy.props import(
+    EnumProperty,
+)
 
 
 class GU_PT_clean_scene(Panel):
@@ -14,8 +17,10 @@ class GU_PT_clean_scene(Panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
-        self.layout.operator(GU_OT_clean_faulty_drivers.bl_idname)
-        self.layout.operator(GU_OT_update_all_drivers.bl_idname)
+        layout = self.layout
+        layout.operator(GU_OT_clean_faulty_drivers.bl_idname)
+        layout.operator(GU_OT_update_all_drivers.bl_idname)
+        layout.operator(GU_OT_remove_fake_users.bl_idname)
 
 
 class GU_OT_clean_faulty_drivers(Operator):
@@ -68,4 +73,43 @@ class GU_OT_update_all_drivers(bpy.types.Operator):
                         ob.path_resolve(d.data_path)
                     except ValueError:
                         pass
+        return {"FINISHED"}
+
+
+def retrieve_data_to_clear(self, context):
+    retrieve_data_to_clear.all = 'All'
+    items = [(retrieve_data_to_clear.all,)*3]
+    for d in dir(bpy.data):
+        if "bpy_prop_collection" in str(type(getattr(bpy.data, d))):
+            items.append((d, d.capitalize(), d))
+    return items
+
+
+class GU_OT_remove_fake_users(bpy.types.Operator):
+    """Remove 'use fake user' properties from selected data containers"""
+
+    bl_idname = "clean.remove_fake_users"
+    bl_label = "Remove Fake Users"
+    bl_options = {"UNDO"}
+
+    data_to_clear: EnumProperty(
+        name="Data to Clear",
+        description="Choose which data container to clear all fake users",
+        items=retrieve_data_to_clear,)
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
+    def execute(self, context):
+        cols_to_clear = []
+        if self.data_to_clear == retrieve_data_to_clear.all:
+            for d in dir(bpy.data):
+                if "bpy_prop_collection" in str(type(getattr(bpy.data, d))):
+                    cols_to_clear.append(d)
+        else:
+            cols_to_clear.append(self.data_to_clear)
+        for col in cols_to_clear:
+            for e in getattr(bpy.data, col):
+                if hasattr(e, "use_fake_user"):
+                    e.use_fake_user = False
         return {"FINISHED"}
