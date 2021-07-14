@@ -21,6 +21,7 @@ class GU_PT_clean_scene(Panel):
         layout.operator(GU_OT_clean_faulty_drivers.bl_idname)
         layout.operator(GU_OT_update_all_drivers.bl_idname)
         layout.operator(GU_OT_remove_fake_users.bl_idname)
+        layout.operator(GU_OT_remove_single_empties.bl_idname)
 
 
 class GU_OT_clean_faulty_drivers(Operator):
@@ -112,4 +113,23 @@ class GU_OT_remove_fake_users(bpy.types.Operator):
             for e in getattr(bpy.data, col):
                 if hasattr(e, "use_fake_user"):
                     e.use_fake_user = False
+        return {"FINISHED"}
+
+
+class GU_OT_remove_single_empties(bpy.types.Operator):
+    """Remove empties with no parenting hierarchy attached"""
+
+    bl_idname = "clean.remove_single_empties"
+    bl_label = "Remove Single Empties"
+    bl_options = {"UNDO"}
+
+    def execute(self, context):
+        empties = [o for o in bpy.data.objects if o.type == 'EMPTY' and o.parent is None]
+        for o in bpy.data.objects:
+            if o.parent in empties:
+                empties.remove(o.parent)
+
+        bpy.ops.object.select_all(action='DESELECT')
+        [e.select_set(True) for e in empties]
+        bpy.ops.object.delete()
         return {"FINISHED"}
