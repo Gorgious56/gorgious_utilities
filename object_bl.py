@@ -3,11 +3,12 @@ from bpy.types import(
     Operator,
 )
 
+from .property import copy_all_custom_props
 
 class GU_OT_copy_custom_props(Operator):
-    """Copies custom props from active to all selected objects"""
-    bl_idname = "object.copy_custom_props"
-    bl_label = "Copy Props"
+    """Copies all custom props from active to selected objects"""
+    bl_idname = "object.copy_all_custom_props"
+    bl_label = "Copy ALL Props"
     bl_options = {"UNDO"}
 
     @classmethod
@@ -15,29 +16,11 @@ class GU_OT_copy_custom_props(Operator):
         return context.active_object is not None and len(context.selected_editable_objects) > 1
 
     def execute(self, context):
-        ob_sel = context.selected_editable_objects
-        ob_act = context.object
-        for ob in ob_sel:
-            if ob == ob_act:
-                continue
-            for p in ob_act.keys():
-                if p == '_RNA_UI':
-                    # Make sure the dictionary is initialized (Mainly for empty objects) :
-                    if p not in ob.keys():
-                        ob[p] = {}
-                    for sub_p in ob_act[p].keys():
-                        # This will copy over the subtype field :
-                        ob[p][sub_p] = ob_act[p][sub_p].to_dict()
-                else:
-                    # This is a "standard" property (not under '_RNA_UI') - for some reason:
-                    ob[p] = ob_act[p]
-            for p in ob_act.keys():
-                if p == '_RNA_UI':
+        ao = context.active_object
+        for ob in context.selected_editable_objects:
+            if ob == ao:
                     continue
-                # Copy over the overridable flag :
-                ob.property_overridable_library_set(
-                    f'["{p}"]', ob_act.is_property_overridable_library(f'["{p}"]'))
-
+            copy_all_custom_props(ao, ob)
         return {'FINISHED'}
 
 

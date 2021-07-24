@@ -9,7 +9,7 @@ bl_info = {
     "name": "Gorgious Utilities",
     "blender": (2, 93, 0),
     "category": "Object",
-    "version": (0, 1, 16),
+    "version": (0, 1, 17),
     "author": "Gorgious56",
     "description": "Add various utility operators",
 }
