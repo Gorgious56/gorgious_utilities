@@ -7,30 +7,34 @@ from bpy.props import(
 )
 
 
+def get_all_ui_props(obj):
+    items = obj.items()
+    rna_properties = {prop.identifier for prop in obj.bl_rna.properties if prop.is_runtime}
+    for k, _ in items:
+        if k in rna_properties:
+            continue
+        yield k
+
+
 def copy_all_custom_props(source, target):
     "Copies ALL custom props from source to target"
-    for prop in source['_RNA_UI'].keys():
-        copy_custom_prop(source, target, prop)
+    target.id_properties_ensure()
+    source.id_properties_ensure()
+    for prop_name in get_all_ui_props(source):
+        copy_custom_prop(source, target, prop_name, ensure=False)
 
 
-def copy_custom_prop(source, target, prop):
+def copy_custom_prop(source, target, prop_name, ensure=True):
     "Copies custom prop from source to target"
-    # Make sure the custom props dictionary is initialized (Mainly for empty objects) :
-    rna_ui_id = '_RNA_UI'
-    if rna_ui_id not in target.keys():
-        target[rna_ui_id] = {}
-
-    # Copy custom prop :
-    target[prop] = source[prop]
-    # Copy the subtype, min, max etc :
-    try:
-        target[rna_ui_id][prop] = source[rna_ui_id][prop].to_dict()
-    except KeyError:
-        # Custom prop is API defined. Don't mess with it.
-        pass
-    # "overridable" is a "special" attribute :
+    if ensure:
+        target.id_properties_ensure()
+        source.id_properties_ensure()
+    prop_data_source = source.id_properties_ui(prop_name)
+    target[prop_name] = source[prop_name]
+    prop_data_target = target.id_properties_ui(prop_name)
+    prop_data_target.update_from(prop_data_source)
     target.property_overridable_library_set(
-        f'["{prop}"]', source.is_property_overridable_library(f'["{prop}"]'))
+        f'["{prop_name}"]', source.is_property_overridable_library(f'["{prop_name}"]'))
 
 
 def retrieve_props(self, context):
@@ -39,9 +43,10 @@ def retrieve_props(self, context):
     items = []
     ao = context.active_object
 
-    [items.append((p.identifier, p.name, p.description))
-        for p in ao.bl_rna.properties
-        if not p.is_readonly]
+    for p in ao.bl_rna.properties:
+        if p.is_readonly:
+            continue
+        items.append((p.identifier, p.name, p.description))
     if '_RNA_UI' in ao.keys():
         [items.append((p, p, p))
             for p in ao.keys()

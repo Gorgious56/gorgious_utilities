@@ -3,14 +3,12 @@ from .object_bl import (
     GU_OT_mesh_empty_add,
     GU_OT_mesh_single_vertex_add,
     GU_OT_copy_custom_props,
+    GU_OT_material_init_custom_props,
     GU_OT_remove_custom_props,
     GU_OT_toggle_object_render,
 )
 from .mesh import (
     GU_OT_print_highest_mesh_count,
-)
-from .material import (
-    GU_OT_material_init_custom_props,
 )
 from .collection import (
     GU_OT_collection_move_to_this,
@@ -32,7 +30,8 @@ def draw_new_mesh_objects(self, _):
 def draw_custom_properties_ops(self, _):
     row = self.layout.row(align=True)
     row.operator(GU_OT_copy_custom_props.bl_idname, text="", icon='EYEDROPPER')
-    row.operator(GU_OT_material_init_custom_props.bl_idname, text="", icon='MATERIAL')
+    row.operator(GU_OT_material_init_custom_props.bl_idname, text="", icon='MATERIAL').overwrite = False
+    row.operator(GU_OT_material_init_custom_props.bl_idname, text="", icon='NODE_MATERIAL').overwrite = True
     row.operator(GU_OT_remove_custom_props.bl_idname, text="", icon='TRASH')
 
 
