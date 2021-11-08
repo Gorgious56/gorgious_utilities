@@ -17,22 +17,22 @@ from .collection import (
     GU_OT_destructively_join_meshes,
     get_collection_layers_from_collections,
 )
-from .property import(
+from .property import (
     GU_OT_property_copy,
 )
 
 
 def draw_new_mesh_objects(self, _):
-    self.layout.operator(GU_OT_mesh_empty_add.bl_idname, text="Empty", icon='GHOST_ENABLED')
-    self.layout.operator(GU_OT_mesh_single_vertex_add.bl_idname, text="Single Vertex", icon='DOT')
+    self.layout.operator(GU_OT_mesh_empty_add.bl_idname, text="Empty", icon="GHOST_ENABLED")
+    self.layout.operator(GU_OT_mesh_single_vertex_add.bl_idname, text="Single Vertex", icon="DOT")
 
 
 def draw_custom_properties_ops(self, _):
     row = self.layout.row(align=True)
-    row.operator(GU_OT_copy_custom_props.bl_idname, text="", icon='EYEDROPPER')
-    row.operator(GU_OT_material_init_custom_props.bl_idname, text="", icon='MATERIAL').overwrite = False
-    row.operator(GU_OT_material_init_custom_props.bl_idname, text="", icon='NODE_MATERIAL').overwrite = True
-    row.operator(GU_OT_remove_custom_props.bl_idname, text="", icon='TRASH')
+    row.operator(GU_OT_copy_custom_props.bl_idname, text="", icon="EYEDROPPER")
+    row.operator(GU_OT_material_init_custom_props.bl_idname, text="", icon="MATERIAL").overwrite = False
+    row.operator(GU_OT_material_init_custom_props.bl_idname, text="", icon="NODE_MATERIAL").overwrite = True
+    row.operator(GU_OT_remove_custom_props.bl_idname, text="", icon="TRASH")
 
 
 def draw_toggle_render_object_context(self, _):

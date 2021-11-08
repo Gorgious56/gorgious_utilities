@@ -1,8 +1,8 @@
-from bpy.types import(
+from bpy.types import (
     Operator,
 )
 
-from bpy.props import(
+from bpy.props import (
     EnumProperty,
 )
 
@@ -34,7 +34,8 @@ def copy_custom_prop(source, target, prop_name, ensure=True):
     prop_data_target = target.id_properties_ui(prop_name)
     prop_data_target.update_from(prop_data_source)
     target.property_overridable_library_set(
-        f'["{prop_name}"]', source.is_property_overridable_library(f'["{prop_name}"]'))
+        f'["{prop_name}"]', source.is_property_overridable_library(f'["{prop_name}"]')
+    )
 
 
 def retrieve_props(self, context):
@@ -47,12 +48,13 @@ def retrieve_props(self, context):
         if p.is_readonly:
             continue
         items.append((p.identifier, p.name, p.description))
-    if '_RNA_UI' in ao.keys():
-        [items.append((p, p, p))
+    if "_RNA_UI" in ao.keys():
+        [
+            items.append((p, p, p))
             for p in ao.keys()
-            if not p.startswith('_')  # Make sure it's not "private"
-            if p in ao['_RNA_UI'].keys()  # Make sure it's not API defined
-         ]
+            if not p.startswith("_")  # Make sure it's not "private"
+            if p in ao["_RNA_UI"].keys()  # Make sure it's not API defined
+        ]
     items.sort(key=lambda e: e[1])
     items.insert(0, (retrieve_props.no_copy, "NONE", "Do not copy any property"))
     return items
@@ -60,17 +62,19 @@ def retrieve_props(self, context):
 
 class GU_OT_property_copy(Operator):
     """Copy Property"""
+
     bl_idname = "property.copy"
     bl_label = "Copy Any Property from active to selected"
-    bl_settings = {'INTERNAL'}
-    bl_options = {'UNDO', 'REGISTER'}
+    bl_settings = {"INTERNAL"}
+    bl_options = {"UNDO", "REGISTER"}
 
     prop_copy: EnumProperty(
         name="Copy Property",
         description="Choose which property to copy from active to selected.\n Silently passes if target object doesn't have property",
-        items=retrieve_props,)
+        items=retrieve_props,
+    )
 
-    @ classmethod
+    @classmethod
     def poll(cls, context):
         return context.active_object is not None and len(context.selected_objects) > 0
 

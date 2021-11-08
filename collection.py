@@ -138,8 +138,6 @@ class GU_OT_destructively_join_meshes(Operator):
         while instances:
             bpy.data.objects.remove(instances.pop())
 
-        #        [obj.select_set(False) for obj in all_converted_objects]
-
         all_child_collections = []
         get_all_children(all_child_collections, col_parent)
 

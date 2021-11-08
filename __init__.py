@@ -2,7 +2,7 @@
 Base module required for Blender registration
 """
 
-from .import auto_load
+from . import auto_load
 
 
 bl_info = {
