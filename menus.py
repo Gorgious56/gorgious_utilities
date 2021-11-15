@@ -64,7 +64,13 @@ def draw_exclude_collections_from_object(self, context):
     for col_layer in get_collection_layers_from_collections(context, context.active_object.users_collection):
         split = layout.split(align=True, factor=0.4)
         split.label(text=col_layer.name)
-        split.prop(col_layer, "exclude")
+        split.prop(col_layer, "exclude", text="")
+        col_name = col_layer.collection.name
+        col = bpy.data.collections[col_name]
+        split.prop(col, "hide_select", text="")
+        split.prop(col_layer, "hide_viewport", text="")
+        split.prop(col, "hide_viewport", text="")
+        split.prop(col, "hide_render", text="")
 
 
 def draw_collection_context(self, _):
