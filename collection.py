@@ -1,6 +1,8 @@
+from collections import defaultdict
 import bpy
 from bpy.types import (
     Operator,
+    Panel,
 )
 
 
@@ -29,6 +31,66 @@ class GU_OT_collection_move_to_this(Operator):
         return {"FINISHED"}
 
 
+class GU_OT_collection_replace_in_name(Operator):    
+    bl_idname = "collection.replace_in_name"
+    bl_label = "Replace in collection names"
+    bl_options = {"REGISTER", "UNDO"}
+
+    replace_from: bpy.props.StringProperty(name="Replace")
+    replace_to: bpy.props.StringProperty(name="By")
+
+    def invoke(self, context, event):
+        self.replace_from = context.collection.name
+        return context.window_manager.invoke_props_dialog(self)
+
+    def execute(self, context):
+        if not self.replace_from:
+            return {"FINISHED"}
+        for col in context.selected_ids:
+            if not isinstance(col, bpy.types.Collection):
+                continue
+            col.name = col.name.replace(self.replace_from, self.replace_to)
+        return {"FINISHED"}
+
+
+class GU_OT_collection_duplicate_hierarchy_only(Operator):
+    bl_idname = "collection.duplicate_hierarchy_only"
+    bl_label = "Duplicate Collection Hierarchy Only"
+    bl_options = {"REGISTER", "UNDO"}
+    replace_from: bpy.props.StringProperty(name="Replace")
+    replace_to: bpy.props.StringProperty(name="By")
+
+    @classmethod
+    def poll(cls, context):
+        return context.collection
+
+    def invoke(self, context, event):
+        self.replace_from = context.collection.name
+        return context.window_manager.invoke_props_dialog(self)
+
+    def execute(self, context):
+        tree, all_colls = get_tree(context.collection)
+
+        new_colls = []
+        for coll in all_colls:
+            new_coll = bpy.data.collections.new(coll.name.replace(self.replace_from, self.replace_to))
+            new_coll.color_tag = coll.color_tag
+            new_colls.append(new_coll)
+
+        for old_col_parent, old_cols in tree.items():
+            for old_col in old_cols:
+                child = new_colls[all_colls.index(old_col)]
+                if old_col_parent is None:
+                    parent = get_parent(old_col)
+                    if parent is None:
+                        parent = context.scene.collection
+                else:
+                    parent = new_colls[all_colls.index(old_col_parent)]
+                parent.children.link(child)
+
+        return {"FINISHED"}
+
+
 class GU_OT_collection_toggle_object_visibility(Operator):
     """Toggle Visibility of Boolean Collections"""
 
@@ -42,8 +104,7 @@ class GU_OT_collection_toggle_object_visibility(Operator):
         cols = [c for c in bpy.data.collections if self.col_name.lower() in c.name.lower()]
         if cols:
             exclude = None
-            layer_collections = []
-            get_all_children(layer_collections, context.view_layer.layer_collection)
+            layer_collections = get_all_children(context.view_layer.layer_collection)
             layer_collections_collections = [l_c.collection for l_c in layer_collections]
             for i, col in enumerate(cols):
                 index = layer_collections_collections.index(col)
@@ -55,16 +116,14 @@ class GU_OT_collection_toggle_object_visibility(Operator):
 
 
 def get_collection_layer_from_collection(context, collection):
-    layer_collections = []
-    get_all_children(layer_collections, context.view_layer.layer_collection)
+    layer_collections = get_all_children(context.view_layer.layer_collection)
     for col_layer in layer_collections:
         if col_layer.collection == collection:
             return col_layer
 
 
 def get_collection_layers_from_collections(context, collections):
-    layer_collections = []
-    get_all_children(layer_collections, context.view_layer.layer_collection)
+    layer_collections = get_all_children(context.view_layer.layer_collection)
     cols_ret = []
     for col_layer in layer_collections:
         if col_layer.collection in collections:
@@ -72,10 +131,28 @@ def get_collection_layers_from_collections(context, collections):
     return cols_ret
 
 
-def get_all_children(collections, col):
-    collections.append(col)
+def get_all_children(col):
+    yield col
     for child in col.children:
-        get_all_children(collections, child)
+        yield from get_all_children(child)
+
+
+def get_parent(col):
+    for c in bpy.data.collections:
+        if col.name in c.children:
+            return c
+    return None
+
+def get_tree(col):
+    tree = defaultdict(set)
+    all_cols = []
+    def get_children_tree(tree, _col, parent=None):
+        tree[parent].add(_col)
+        all_cols.append(_col)
+        for child in _col.children:
+            get_children_tree(tree, child, _col)
+    get_children_tree(tree, col)
+    return tree, all_cols
 
 
 class GU_OT_destructively_join_meshes(Operator):
@@ -87,6 +164,10 @@ class GU_OT_destructively_join_meshes(Operator):
 
     col_name: bpy.props.StringProperty(name="Col Name", default="BOOL")
     join_wire_objects: bpy.props.BoolProperty(name="Join Wire Objects", default=False)
+
+    @classmethod
+    def poll(cls, context):
+        return context.selected_objects
 
     def execute(self, context):
         col_parent = context.collection
@@ -138,8 +219,7 @@ class GU_OT_destructively_join_meshes(Operator):
         while instances:
             bpy.data.objects.remove(instances.pop())
 
-        all_child_collections = []
-        get_all_children(all_child_collections, col_parent)
+        all_child_collections = get_all_children(col_parent)
 
         for coll in all_child_collections:
             if coll == col_parent:
@@ -193,3 +273,16 @@ class GU_OT_collection_rename_objects(Operator):
     def execute(self, context):
         rename_children_and_self_objects(context.collection)
         return {"FINISHED"}
+
+
+class GU_PT_collection_properties_utilities(Panel):
+    bl_label = "Utilities"
+    bl_idname = "GU_PT_collection_properties_utilities"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "collection"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.operator(GU_OT_collection_duplicate_hierarchy_only.bl_idname)

@@ -13,6 +13,8 @@ from .mesh import (
 from .collection import (
     GU_OT_collection_move_to_this,
     GU_OT_collection_rename_objects,
+    GU_OT_collection_duplicate_hierarchy_only,
+    GU_OT_collection_replace_in_name,
     GU_OT_collection_toggle_object_visibility,
     GU_OT_destructively_join_meshes,
     get_collection_layers_from_collections,
@@ -43,18 +45,18 @@ def draw_print_mesh_count(self, _):
     self.layout.operator(GU_OT_print_highest_mesh_count.bl_idname)
 
 
-def draw_custom_props_links(self, context):
+def draw_custom_props_links(self, _):
     self.layout.operator(GU_OT_material_init_custom_props.bl_idname, text="Copy Material Attributes")
     self.layout.operator(GU_OT_copy_custom_props.bl_idname, text="Copy Custom Properties")
     self.layout.operator(GU_OT_property_copy.bl_idname, text="Copy ANY Property")
 
 
-def draw_boolean_collection_toggle(self, context):
+def draw_boolean_collection_toggle(self, _):
     op = self.layout.operator(GU_OT_collection_toggle_object_visibility.bl_idname, text="Toggle Booleans")
     op.col_name = "BOOL"
 
 
-def draw_blueprint_collection_toggle(self, context):
+def draw_blueprint_collection_toggle(self, _):
     op = self.layout.operator(GU_OT_collection_toggle_object_visibility.bl_idname, text="Toggle Blueprints")
     op.col_name = "BP_"
 
@@ -73,11 +75,16 @@ def draw_exclude_collections_from_object(self, context):
         split.prop(col, "hide_render", text="")
 
 
-def draw_collection_context(self, _):
+def draw_outliner_collection_context(self, _):
     layout = self.layout
     layout.separator()
     layout.operator(GU_OT_collection_rename_objects.bl_idname, text="Rename Objects")
     layout.operator(GU_OT_collection_move_to_this.bl_idname, text="Move Selected Objects to this Collection")
+    oc = layout.operator_context
+    layout.operator_context = "INVOKE_DEFAULT"
+    layout.operator(GU_OT_collection_duplicate_hierarchy_only.bl_idname, text="Duplicate Hierarchy")
+    layout.operator(GU_OT_collection_replace_in_name.bl_idname, text="Replace names")
+    layout.operator_context = oc
     layout.operator(GU_OT_destructively_join_meshes.bl_idname, text="Destructively Join Meshes")
 
 
@@ -88,7 +95,7 @@ menus_appends = {
     bpy.types.VIEW3D_MT_object_cleanup: draw_print_mesh_count,
     bpy.types.VIEW3D_MT_view: draw_boolean_collection_toggle,
     bpy.types.VIEW3D_MT_view: draw_blueprint_collection_toggle,
-    bpy.types.OUTLINER_MT_collection: draw_collection_context,
+    bpy.types.OUTLINER_MT_collection: draw_outliner_collection_context,
     bpy.types.OBJECT_PT_collections: draw_exclude_collections_from_object,
 }
 menus_prepends = {
