@@ -22,6 +22,9 @@ from .collection import (
 from .property import (
     GU_OT_property_copy,
 )
+from .modifier import (
+    GU_OT_modifier_replace_a_with_b,
+)
 
 
 def draw_new_mesh_objects(self, _):
@@ -87,6 +90,9 @@ def draw_outliner_collection_context(self, _):
     layout.operator_context = oc
     layout.operator(GU_OT_destructively_join_meshes.bl_idname, text="Destructively Join Meshes")
 
+def draw_modifiers_properties(self, _):
+    self.layout.operator(GU_OT_modifier_replace_a_with_b.bl_idname, icon="NODETREE")
+
 
 menus_appends = {
     bpy.types.VIEW3D_MT_make_links: draw_custom_props_links,
@@ -100,6 +106,7 @@ menus_appends = {
 }
 menus_prepends = {
     bpy.types.OBJECT_PT_custom_props: draw_custom_properties_ops,
+    bpy.types.DATA_PT_modifiers: draw_modifiers_properties,
 }
 
 
