@@ -38,6 +38,7 @@ class GU_OT_collection_replace_in_name(Operator):
 
     replace_from: bpy.props.StringProperty(name="Replace")
     replace_to: bpy.props.StringProperty(name="By")
+    replace_children: bpy.props.BoolProperty(name="Replace in children", default=True)
 
     def invoke(self, context, event):
         self.replace_from = context.collection.name
@@ -46,11 +47,24 @@ class GU_OT_collection_replace_in_name(Operator):
     def execute(self, context):
         if not self.replace_from:
             return {"FINISHED"}
+        cols = set()
+
         for col in context.selected_ids:
             if not isinstance(col, bpy.types.Collection):
-                continue
+                continue          
+            cols.add(col)  
+            if self.replace_children:
+                cols.update(get_all_children(col))
+        for col in cols:
             col.name = col.name.replace(self.replace_from, self.replace_to)
         return {"FINISHED"}
+
+
+def get_parent(col):
+    for c in bpy.data.collections:
+        if col.name in c.children:
+            return c
+    return None
 
 
 class GU_OT_collection_duplicate_hierarchy_only(Operator):
@@ -91,6 +105,11 @@ class GU_OT_collection_duplicate_hierarchy_only(Operator):
         return {"FINISHED"}
 
 
+def get_all_children(col):
+    yield col
+    for child in col.children:
+        yield from get_all_children(child)
+
 class GU_OT_collection_toggle_object_visibility(Operator):
     """Toggle Visibility of Boolean Collections"""
 
@@ -130,18 +149,6 @@ def get_collection_layers_from_collections(context, collections):
             cols_ret.append(col_layer)
     return cols_ret
 
-
-def get_all_children(col):
-    yield col
-    for child in col.children:
-        yield from get_all_children(child)
-
-
-def get_parent(col):
-    for c in bpy.data.collections:
-        if col.name in c.children:
-            return c
-    return None
 
 def get_tree(col):
     tree = defaultdict(set)
