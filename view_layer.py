@@ -74,7 +74,8 @@ class GU_PT_view_layer_stored_view(bpy.types.Panel):
             if hasattr(bpy.types, "VIEW3D_OT_stored_views_initialize"):
                 layout.operator("view3d.stored_views_initialize")
             else:
-                layout.label(text="Enable \"Stored Views\" add-on to access Stored Views", icon="ERROR")
+                layout.label(text="\"Stored Views\" add-on is needed to access Stored Views", icon="ERROR")
+                layout.operator("preferences.addon_enable").module = "space_view3d_stored_views"
             return
         
         view_layer = context.view_layer
