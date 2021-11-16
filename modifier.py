@@ -23,7 +23,7 @@ class GU_OT_modifier_replace_a_with_b(bpy.types.Operator):
     def execute(self, context):
         replace_from = bpy.data.node_groups.get(self.replace_from)
         replace_with = bpy.data.node_groups.get(self.replace_with)
-        if replace_from and replace_with and replace_with != replace_from or True:
+        if replace_from and replace_with and replace_with != replace_from:
             for obj in context.selected_objects:
                 if not hasattr(obj, "modifiers"):
                     continue
