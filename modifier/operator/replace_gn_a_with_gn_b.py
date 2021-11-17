@@ -5,11 +5,15 @@ from gorgious_utilities.modifier.helper import (
 
 class GU_OT_modifier_replace_a_with_b(bpy.types.Operator):    
     bl_idname = "modifier.replace_gn_a_with_gn_b"
-    bl_label = "Replace modifier"
+    bl_label = "Replace GN Modifier"
     bl_options = {"REGISTER", "UNDO"}
 
     replace_from: bpy.props.EnumProperty(items=get_geometry_nodes_groups, name="Replace")
     replace_with: bpy.props.EnumProperty(items=get_geometry_nodes_groups, name="With")
+
+    @classmethod
+    def poll(cls, context):
+        return any(get_geometry_nodes_groups(None, context))
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
