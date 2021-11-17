@@ -1,10 +1,10 @@
 import bpy
 
 
-class GU_OT_mesh_single_vertex_add(bpy.types.Operator):
+class GU_OT_mesh_add_single_vertex(bpy.types.Operator):
     """Add a mesh object with a single vertex at origin"""
 
-    bl_idname = "mesh.single_vertex_add"
+    bl_idname = "mesh.add_single_vertex"
     bl_label = "Single Vertex"
     bl_options = {"REGISTER", "UNDO"}
 

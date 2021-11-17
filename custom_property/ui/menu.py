@@ -4,9 +4,9 @@ import bpy
 def draw_custom_properties_ops(self, _):
     row = self.layout.row(align=True)
     row.operator("property.copy_any", text="", icon="EYEDROPPER")
-    row.operator(GU_OT_material_init_custom_props.bl_idname, text="", icon="MATERIAL").overwrite = False
-    row.operator(GU_OT_material_init_custom_props.bl_idname, text="", icon="NODE_MATERIAL").overwrite = True
-    row.operator(GU_OT_remove_custom_props.bl_idname, text="", icon="TRASH")
+    row.operator("material.init_custom_properties", text="", icon="MATERIAL").overwrite = False
+    row.operator("material.init_custom_properties", text="", icon="NODE_MATERIAL").overwrite = True
+    row.operator("object.remove_all_custom_props", text="", icon="TRASH")
 
 def draw_custom_props_links(self, _):
     self.layout.operator("property.copy_all", text="Copy Custom Properties")
