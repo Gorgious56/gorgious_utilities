@@ -1,14 +1,11 @@
 from queue import PriorityQueue
 import bpy
-from bpy.types import (
-    Operator,
-)
 
 
-class GU_OT_print_highest_mesh_count(Operator):
+class GU_OT_print_highest_verts_count(bpy.types.Operator):
     """Destructively applies modifiers, converts curves and instances, removes boolean collections, and join meshes"""
 
-    bl_idname = "mesh.print_highest_mesh_count"
+    bl_idname = "mesh.print_highest_verts_count"
     bl_label = "Print Mesh Count"
     bl_options = {"UNDO"}
 
