@@ -1,16 +1,10 @@
 import bpy
-
-
-def get_geometry_nodes_groups(self, context):
-    get_geometry_nodes_groups.groups = []
-    for ng in [ng for ng in bpy.data.node_groups if ng.bl_idname == "GeometryNodeTree"]:
-        get_geometry_nodes_groups.groups.append((ng.name, ) * 3)
-    return get_geometry_nodes_groups.groups
-
-
+from gorgious_utilities.modifier.helper import (
+    get_geometry_nodes_groups,
+)
 
 class GU_OT_modifier_replace_a_with_b(bpy.types.Operator):    
-    bl_idname = "modifier.replace_a_with_b"
+    bl_idname = "modifier.replace_gn_a_with_gn_b"
     bl_label = "Replace modifier"
     bl_options = {"REGISTER", "UNDO"}
 
