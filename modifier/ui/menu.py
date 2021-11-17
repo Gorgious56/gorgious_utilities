@@ -1,8 +1,18 @@
 import bpy
 
 
-def draw_modifiers_properties(self, _):
-    self.layout.operator("modifier.replace_gn_a_with_gn_b", icon="NODETREE")
+def draw_modifiers_properties(self, context):
+    layout = self.layout
+    layout.operator("modifier.replace_gn_a_with_gn_b", icon="NODETREE")
+
+    row = layout.row(align=True)
+    sub_row = row.row(align=True)
+    op = sub_row.operator("object.make_links_data", text="Copy", icon="PASTEDOWN")
+    op.type = "MODIFIERS"
+    sub_row.operator("modifier.drive", icon="DECORATE_DRIVER")
+    sub_row.operator("modifier.sync", text="Synch", icon="UV_SYNC_SELECT")
+    sub_row.enabled = bool(len(context.view_layer.objects.selected) > 1 and context.active_object)
+    row.operator("modifier.desync", text="Desynch", icon="UNLINKED")
 
 
 def draw_select_used_booleans(self, context):
