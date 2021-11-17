@@ -24,11 +24,9 @@ def get_collection_layer_from_collection(view_layer, collection):
 
 def get_collection_layers_from_collections(view_layer, collections):
     layer_collections = get_all_children(view_layer.layer_collection)
-    cols_ret = []
     for col_layer in layer_collections:
         if col_layer.collection in collections:
-            cols_ret.append(col_layer)
-    return cols_ret
+            yield col_layer
 
 
 def get_tree(col):
@@ -54,3 +52,20 @@ def rename_children_and_self_objects(col):
             obj.data.name = col.name
     for sub_col in col.children:
         rename_children_and_self_objects(sub_col)
+
+
+def copy_collection_attributes(view_layers, col_from, col_to):
+    for attr in dir(col_from):
+        if attr == "name":
+            continue
+        try:
+            setattr(col_to, attr, getattr(col_from, attr))
+        except AttributeError:
+            continue
+    for v_l in view_layers:
+        layer_col_from, layer_col_to = get_collection_layers_from_collections(v_l, (col_from, col_to))
+        for attr in dir(layer_col_from):
+            try:
+                setattr(layer_col_to, attr, getattr(layer_col_from, attr))
+            except AttributeError:
+                continue
