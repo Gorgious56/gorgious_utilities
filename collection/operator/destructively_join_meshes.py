@@ -35,8 +35,9 @@ class GU_OT_collection_destructively_join_meshes(bpy.types.Operator):
                     continue
                 # obj.select_set(True)
                 all_converted_objects.append(obj)
-            elif obj.type == "EMPTY" and obj.instance_type == "COLLECTION":
-                instances.append(obj)
+            elif obj.type == "EMPTY":
+                if obj.instance_type == "COLLECTION":
+                    instances.append(obj)
             elif obj.type == "CURVE":
                 curve = obj.data
                 if curve.bevel_depth > 0 or obj.modifiers:
@@ -47,6 +48,7 @@ class GU_OT_collection_destructively_join_meshes(bpy.types.Operator):
                 remove_objs.append(obj)
 
         if instances:
+            [obj.select_set(True) for obj in instances]
             bpy.ops.object.duplicates_make_real({"selected_objects": instances})
             all_converted_objects.extend(context.selected_objects)
 
@@ -57,9 +59,11 @@ class GU_OT_collection_destructively_join_meshes(bpy.types.Operator):
             material=False,
             animation=False,
         )
+
+        # https://developer.blender.org/T93188
         context.view_layer.objects.active = all_converted_objects[0]
-        all_converted_objects[0].select_set(True)
-        bpy.ops.object.convert({"selected_objects": all_converted_objects}, target="MESH")
+        [o.select_set(True) for o in all_converted_objects]
+        bpy.ops.object.convert(target="MESH")
 
         # Delete all Empty Objects
         bpy.data.batch_remove(remove_objs)
