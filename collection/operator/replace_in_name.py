@@ -1,6 +1,6 @@
 import bpy
 from gorgious_utilities.collection.helper import (
-    get_all_children,
+    get_family_down,
 )
 
 
@@ -11,24 +11,27 @@ class GU_OT_collection_replace_in_name(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     replace_from: bpy.props.StringProperty(name="Replace")
-    replace_to: bpy.props.StringProperty(name="By")
+    replace_to: bpy.props.StringProperty(name="With")
     replace_children: bpy.props.BoolProperty(name="Replace in children", default=True)
 
     def invoke(self, context, event):
-        self.replace_from = context.collection.name
+        self.replace_from = self.replace_to = context.collection.name
         return context.window_manager.invoke_props_dialog(self)
 
     def execute(self, context):
         if not self.replace_from:
             return {"FINISHED"}
         cols = set()
-
-        for col in context.selected_ids:
+        if hasattr(context, "selected_ids"):
+            selected_cols = (_id for _id in context.selected_ids if isinstance(_id, bpy.types.Collection))
+        else:
+            selected_cols = (context.collection, )
+        for col in selected_cols:
             if not isinstance(col, bpy.types.Collection):
                 continue          
-            cols.add(col)  
+            cols.add(col)
             if self.replace_children:
-                cols.update(get_all_children(col))
+                cols.update(get_family_down(col))
         for col in cols:
             col.name = col.name.replace(self.replace_from, self.replace_to)
         return {"FINISHED"}

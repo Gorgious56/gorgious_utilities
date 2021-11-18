@@ -32,7 +32,7 @@ def draw_exclude_collections_from_object(self, context):
 def draw_outliner_collection_context(self, context):
     layout = self.layout
     layout.separator()
-    layout.operator("collection.rename_objects_as_me", text="Rename Objects")
+    layout.operator("collection.rename_objects", text="Rename Objects")
     layout.operator("collection.move_selected_to_this", text="Move Selected Objects to this Collection")
 
     col = next(_id for _id in context.selected_ids if isinstance(_id, bpy.types.Collection))
@@ -45,16 +45,6 @@ def draw_outliner_collection_context(self, context):
     op.col_name = col.name
     op.exclude = not exclude
 
-    oc = layout.operator_context
-    layout.operator_context = "INVOKE_DEFAULT"
-    layout.operator("collection.duplicate_hierarchy_only", text="Duplicate Hierarchy")
-    layout.operator("collection.replace_in_name", text="Replace names")
-    layout.operator_context = oc
-
-    op = layout.operator("collection.delete_objects", text="Delete Objects Recursively").recursive = True
-    op = layout.operator("collection.delete_objects", text="Delete Objects In Collection").recursive = False
-
-    layout.operator("collection.destructively_join_meshes", text="Destructively Join Meshes")
 
 
 menus_appends = {

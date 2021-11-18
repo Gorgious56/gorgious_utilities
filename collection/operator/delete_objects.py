@@ -10,7 +10,11 @@ class GU_OT_collection_delete_objects(bpy.types.Operator):
     recursive: bpy.props.BoolProperty(default=True)
 
     def execute(self, context):
-        for col in (_id for _id in context.selected_ids if isinstance(_id, bpy.types.Collection)):
+        if hasattr(context, "selected_ids"):
+            cols = (_id for _id in context.selected_ids if isinstance(_id, bpy.types.Collection))
+        else:
+            cols = (context.collection, )
+        for col in cols:
             if self.recursive:
                 bpy.data.batch_remove(col.all_objects)
             else:

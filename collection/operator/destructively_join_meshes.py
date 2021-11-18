@@ -1,6 +1,6 @@
 import bpy
 from gorgious_utilities.collection.helper import (
-    get_all_children,
+    get_family_down,
 )
 
 
@@ -16,7 +16,7 @@ class GU_OT_collection_destructively_join_meshes(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.selected_objects
+        return context.collection
 
     def execute(self, context):
         col_parent = context.collection
@@ -29,74 +29,63 @@ class GU_OT_collection_destructively_join_meshes(bpy.types.Operator):
         for obj in col_parent.all_objects:
             if obj.name not in context.view_layer.objects:
                 continue
-            if obj.type == "MESH":
+            elif obj.type == "MESH":
                 if not self.join_wire_objects and obj.display_type == "WIRE":
                     remove_objs.append(obj)
                     continue
-                obj.select_set(True)
+                # obj.select_set(True)
                 all_converted_objects.append(obj)
-                continue
             elif obj.type == "EMPTY" and obj.instance_type == "COLLECTION":
                 instances.append(obj)
-                continue
             elif obj.type == "CURVE":
                 curve = obj.data
                 if curve.bevel_depth > 0 or obj.modifiers:
-                    obj.select_set(True)
                     all_converted_objects.append(obj)
                 else:
                     remove_objs.append(obj)
             else:
                 remove_objs.append(obj)
 
-        context.view_layer.objects.active = context.selected_objects[0]
-        bpy.ops.object.make_single_user(object=True, obdata=True, material=False, animation=False)
-        bpy.ops.object.convert(target="MESH")
-        bpy.ops.object.select_all(action="DESELECT")
-
         if instances:
-            ctx = context.copy()
-            ctx["object"] = instances[0]
-            ctx["active_object"] = instances[0]
-            ctx["selected_objects"] = instances
-            ctx["selected_editable_objects"] = instances
-            bpy.ops.object.duplicates_make_real(ctx)
+            bpy.ops.object.duplicates_make_real({"selected_objects": instances})
+            all_converted_objects.extend(context.selected_objects)
+
+        bpy.ops.object.make_single_user(
+            {"selected_objects": all_converted_objects},
+            object=True,
+            obdata=True,
+            material=False,
+            animation=False,
+        )
+        context.view_layer.objects.active = all_converted_objects[0]
+        all_converted_objects[0].select_set(True)
+        bpy.ops.object.convert({"selected_objects": all_converted_objects}, target="MESH")
 
         # Delete all Empty Objects
-        while remove_objs:
-            bpy.data.objects.remove(remove_objs.pop())
-        while instances:
-            bpy.data.objects.remove(instances.pop())
+        bpy.data.batch_remove(remove_objs)
+        bpy.data.batch_remove(instances)
 
-        all_child_collections = get_all_children(col_parent)
+        colls_to_remove = []
 
-        for coll in all_child_collections:
-            if coll == col_parent:
-                continue
-            if coll:
-                if self.col_name.lower() in coll.name.lower():
-                    obs = [o for o in coll.objects if o.users == 1]
-                    while obs:
-                        bpy.data.objects.remove(obs.pop())
-                else:
-                    obs = [o for o in coll.objects]
-                    while obs:
-                        col_parent.objects.link(obs.pop())
+        for coll in get_family_down(col_parent, include_parent=False):
+            if self.col_name.lower() in coll.name.lower():
+                obs = [o for o in coll.objects if o.users == 1]
+                while obs:
+                    bpy.data.objects.remove(obs.pop())
+            else:
+                obs = [o for o in coll.objects]
+                while obs:
+                    col_parent.objects.link(obs.pop())
+            colls_to_remove.append(coll)
 
-                bpy.data.collections.remove(coll)
+        bpy.data.batch_remove(colls_to_remove)
 
         join_objects = [obj for obj in col_parent.all_objects if obj.type == "MESH"]
 
         if join_objects:
-            ctx = context.copy()
-            o = join_objects[0]
-            ctx["object"] = o
-            ctx["active_object"] = o
-            ctx["selected_objects"] = join_objects
-            ctx["selected_editable_objects"] = join_objects
-            bpy.ops.object.join(ctx)
+            bpy.ops.object.join({"object": join_objects[0], "selected_editable_objects":join_objects})
 
-            o.name = col_parent.name
+            join_objects[0].name = col_parent.name
 
         return {"FINISHED"}
 

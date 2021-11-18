@@ -1,6 +1,6 @@
 import bpy
 from gorgious_utilities.collection.helper import (
-    get_all_children,
+    get_family_down,
 )
 
 
@@ -17,7 +17,7 @@ class GU_OT_collection_toggle_object_viewport(bpy.types.Operator):
         cols = [c for c in bpy.data.collections if self.col_name.lower() in c.name.lower()]
         if cols:
             exclude = None
-            layer_collections = get_all_children(context.view_layer.layer_collection)
+            layer_collections = get_family_down(context.view_layer.layer_collection)
             layer_collections_collections = [l_c.collection for l_c in layer_collections]
             for i, col in enumerate(cols):
                 index = layer_collections_collections.index(col)

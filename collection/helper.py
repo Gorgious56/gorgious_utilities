@@ -9,21 +9,22 @@ def get_parent(col):
     return None
 
 
-def get_all_children(col):
-    yield col
+def get_family_down(col, include_parent=True):
+    if include_parent:
+        yield col
     for child in col.children:
-        yield from get_all_children(child)
+        yield from get_family_down(child, include_parent=True)
 
 
 def get_collection_layer_from_collection(view_layer, collection):
-    layer_collections = get_all_children(view_layer.layer_collection)
+    layer_collections = get_family_down(view_layer.layer_collection)
     for col_layer in layer_collections:
         if col_layer.collection == collection:
             return col_layer
 
 
 def get_collection_layers_from_collections(view_layer, collections):
-    layer_collections = get_all_children(view_layer.layer_collection)
+    layer_collections = get_family_down(view_layer.layer_collection)
     for col_layer in layer_collections:
         if col_layer.collection in collections:
             yield col_layer
@@ -41,17 +42,6 @@ def get_tree(col):
 
     get_children_tree(tree, col)
     return tree, all_cols
-
-
-def rename_children_and_self_objects(col):
-    if col is None:
-        return
-    for obj in col.objects:
-        obj.name = col.name
-        if hasattr(obj, "data") and obj.data is not None:
-            obj.data.name = col.name
-    for sub_col in col.children:
-        rename_children_and_self_objects(sub_col)
 
 
 def copy_collection_attributes(view_layers, col_from, col_to):

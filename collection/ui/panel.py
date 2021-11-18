@@ -14,14 +14,39 @@ class GU_PT_collection_properties_utilities(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
-        layout.operator("collection.duplicate_hierarchy_only")
+        oc = layout.operator_context
+        layout.operator_context = "INVOKE_DEFAULT"
+        layout.operator(
+            "collection.duplicate_hierarchy_only", text="Duplicate Hierarchy", icon="OUTLINER_OB_GROUP_INSTANCE"
+        )
+        layout.operator_context = oc
 
         col = context.collection
         layer_col = get_collection_layer_from_collection(context.view_layer, col)
-        exclude = layer_col.exclude
+        excluded = layer_col.exclude
         op = layout.operator(
             "collection.include_or_exclude_from_all_view_layers",
-            text="Exclude Globally" if not exclude else "Include Globally",
+            text=("Include" if excluded else "Exclude") + " Globally",
+            icon="CHECKBOX_HLT" if not excluded else "CHECKBOX_DEHLT",
         )
         op.col_name = col.name
-        op.exclude = not exclude
+        op.exclude = not excluded
+
+        grid = layout.grid_flow(columns=2, align=True)
+        grid.label(text="Delete objects", icon="TRASH")
+        grid.label(text="")
+        op = grid.operator("collection.delete_objects", text="Recursively", icon="OUTLINER_OB_GROUP_INSTANCE")
+        op.recursive = True
+        grid.operator("collection.delete_objects", text="Collection", icon="OUTLINER_COLLECTION").recursive = False
+
+        grid = layout.grid_flow(columns=2, align=True)
+        grid.label(text="Rename", icon="SORTALPHA")
+        grid.label(text="")
+        op = grid.operator("collection.rename_objects", text="Objects", icon="OBJECT_DATAMODE")      
+        oc = grid.operator_context
+        grid.operator_context = "INVOKE_DEFAULT"
+        grid.operator("collection.replace_in_name", text="Collection", icon="OUTLINER_COLLECTION")
+        grid.operator_context = oc
+
+        layout.operator("collection.destructively_join_meshes", text="Destructively Join Meshes")
+
