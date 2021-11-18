@@ -13,10 +13,10 @@ def draw_custom_props_links(self, _):
     self.layout.operator("property.copy_any", text="Copy ANY Property")
 
 menus_appends = {
-}
-menus_prepends = {
     bpy.types.OBJECT_PT_custom_props: draw_custom_properties_ops,
     bpy.types.VIEW3D_MT_make_links: draw_custom_props_links,
+}
+menus_prepends = {
 }
 
 
