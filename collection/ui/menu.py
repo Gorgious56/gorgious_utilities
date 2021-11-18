@@ -50,6 +50,10 @@ def draw_outliner_collection_context(self, context):
     layout.operator("collection.duplicate_hierarchy_only", text="Duplicate Hierarchy")
     layout.operator("collection.replace_in_name", text="Replace names")
     layout.operator_context = oc
+
+    op = layout.operator("collection.delete_objects", text="Delete Objects Recursively").recursive = True
+    op = layout.operator("collection.delete_objects", text="Delete Objects In Collection").recursive = False
+
     layout.operator("collection.destructively_join_meshes", text="Destructively Join Meshes")
 
 
