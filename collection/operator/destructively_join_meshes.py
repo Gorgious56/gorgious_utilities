@@ -88,7 +88,6 @@ class GU_OT_collection_destructively_join_meshes(bpy.types.Operator):
 
         if join_objects:
             bpy.ops.object.join({"object": join_objects[0], "selected_editable_objects":join_objects})
-
             join_objects[0].name = col_parent.name
 
         return {"FINISHED"}
