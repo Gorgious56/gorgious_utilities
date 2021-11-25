@@ -3,7 +3,8 @@ from gorgious_utilities.modifier.helper import (
     get_geometry_nodes_groups,
 )
 
-class GU_OT_modifier_replace_a_with_b(bpy.types.Operator):    
+
+class GU_OT_modifier_replace_a_with_b(bpy.types.Operator):
     bl_idname = "modifier.replace_gn_a_with_gn_b"
     bl_label = "Replace GN Modifier"
     bl_options = {"REGISTER", "UNDO"}
@@ -13,11 +14,13 @@ class GU_OT_modifier_replace_a_with_b(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return any(get_geometry_nodes_groups(None, context))
+        return len(get_geometry_nodes_groups(None, context)) > 1 and any(
+            m for m in context.active_object.modifiers if m.type == "NODES"
+        )
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
-    
+
     def execute(self, context):
         replace_from = bpy.data.node_groups.get(self.replace_from)
         replace_with = bpy.data.node_groups.get(self.replace_with)
@@ -30,4 +33,3 @@ class GU_OT_modifier_replace_a_with_b(bpy.types.Operator):
                         mod.node_group = replace_with
 
         return {"FINISHED"}
-
