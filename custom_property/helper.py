@@ -20,7 +20,10 @@ def copy_custom_prop(source, target, prop_name, ensure=True):
     if ensure:
         target.id_properties_ensure()
         source.id_properties_ensure()
-    prop_data_source = source.id_properties_ui(prop_name)
+    try:
+        prop_data_source = source.id_properties_ui(prop_name)
+    except TypeError:
+        return
     target[prop_name] = source[prop_name]
     prop_data_target = target.id_properties_ui(prop_name)
     prop_data_target.update_from(prop_data_source)
