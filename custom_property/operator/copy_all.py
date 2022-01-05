@@ -8,7 +8,7 @@ class GU_OT_property_copy_all(bpy.types.Operator):
     """Copies all custom props from active to selected objects"""
 
     bl_idname = "property.copy_all"
-    bl_label = "Copy ALL Props"
+    bl_label = "Copy ALL Custom Properties"
     bl_options = {"UNDO"}
 
     @classmethod
