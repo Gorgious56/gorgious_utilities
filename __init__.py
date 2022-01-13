@@ -10,7 +10,6 @@ bl_info = {
     "description": "Add various utility operators",
 }
 
-
 def register():
     auto_load.init()
     auto_load.register()
