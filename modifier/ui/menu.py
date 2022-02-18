@@ -3,7 +3,9 @@ import bpy
 
 def draw_modifiers_properties(self, context):
     layout = self.layout
-    layout.operator("modifier.replace_gn_a_with_gn_b", icon="NODETREE")
+    row = layout.row(align=True)
+    row.operator("modifier.replace_gn_a_with_gn_b", icon="NODETREE")
+    row.operator("modifier.replace_output_name", icon="GROUP_VCOL")
 
     row = layout.row(align=True)
     sub_row = row.row(align=True)

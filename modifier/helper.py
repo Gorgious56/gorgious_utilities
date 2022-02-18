@@ -1,4 +1,5 @@
 import bpy
+from gorgious_utilities.custom_property.helper import get_all_ui_props
 from gorgious_utilities.driver.helper import (
     add_driver_to,
 )
@@ -12,6 +13,29 @@ def get_geometry_nodes_groups(self, context):
     for ng in [ng for ng in bpy.data.node_groups if ng.bl_idname == "GeometryNodeTree"]:
         get_geometry_nodes_groups.groups.append((ng.name,) * 3)
     return get_geometry_nodes_groups.groups
+
+
+def get_geometry_node_modifier_names(self, context):
+    mods = [m for m in context.active_object.modifiers if m.type == "NODES"]
+    return ((mod.name,) * 3 for mod in mods)
+
+
+def get_output_attributes(self, context):
+    o = context.active_object
+    mod = o.modifiers[self.mod_name]
+    node_tree = mod.node_group
+    # output_node = next(n for n in node_tree.nodes if isinstance(n, bpy.types.NodeGroupOutput))
+    # inputs = output_node.inputs
+    # for output in inputs:
+    #     print(output)
+
+    # for k, v in mod.items():
+    #     prop_rna = (mod.id_properties_ui(k))
+    #     print(prop_rna.as_dict())
+
+    for ui_prop in get_all_ui_props(mod):
+        if ui_prop.startswith("Output"):
+            yield (ui_prop,) * 3
 
 
 def mod_equality(mod1, mod2, ignore=["name"]):
