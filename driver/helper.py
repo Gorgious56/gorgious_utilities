@@ -1,3 +1,6 @@
+import bpy
+
+
 def add_driver_to(obj, prop_to, variables, expression):
     """
     Add a driver to obj's prop_to property
@@ -29,3 +32,14 @@ def add_driver_to(obj, prop_to, variables, expression):
         driver.expression = expression
     else:
         driver.expression = variables[0][0]
+
+
+def remove_all_drivers():
+    for obj in bpy.data.objects:
+        if not hasattr(obj, "drivers"):
+            continue
+        drivers_data = obj.animation_data.drivers
+        if not drivers_data:
+            continue
+        for dr in drivers_data:
+            obj.driver_remove(dr.data_path, -1)
