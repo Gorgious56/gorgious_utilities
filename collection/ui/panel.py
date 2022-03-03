@@ -43,7 +43,12 @@ class GU_PT_collection_properties_utilities(bpy.types.Panel):
         grid = layout.grid_flow(columns=2, align=True)
         grid.label(text="Rename", icon="SORTALPHA")
         grid.label(text="")
-        op = grid.operator("collection.rename_objects", text="Objects", icon="OBJECT_DATAMODE")      
+
+        row = grid.row(align=True)
+        op = row.operator("collection.rename_objects", text="Objects", icon="OBJECT_DATAMODE")
+        op = row.operator("collection.rename_objects", text="", icon="LINENUMBERS_ON")
+        op.remove_trailing_numbers = True
+
         oc = grid.operator_context
         grid.operator_context = "INVOKE_DEFAULT"
         grid.operator("collection.replace_in_name", text="Collection", icon="OUTLINER_COLLECTION")

@@ -1,3 +1,4 @@
+import re
 import bpy
 from gorgious_utilities.collection.helper import (
     get_family_down,
@@ -14,7 +15,10 @@ class GU_OT_collection_rename_objects(bpy.types.Operator):
     replace_from: bpy.props.StringProperty(name="Replace")
     replace_to: bpy.props.StringProperty(name="With")
     as_collection: bpy.props.BoolProperty(name="Rename As Collection", default=True)
-    recursive: bpy.props.BoolProperty(name="Replace in children", default=True)
+    recursive: bpy.props.BoolProperty(
+        name="Recursive", description="Replace name in collection's children hierarchy", default=True
+    )
+    remove_trailing_numbers: bpy.props.BoolProperty(default=False, options={"SKIP_SAVE"})
 
     def draw(self, context):
         layout = self.layout
@@ -26,14 +30,22 @@ class GU_OT_collection_rename_objects(bpy.types.Operator):
         col.enabled = not self.as_collection
 
     def invoke(self, context, event):
+        if self.remove_trailing_numbers:
+            return self.execute(context)
         return context.window_manager.invoke_props_dialog(self)
 
     def execute(self, context):
-        cols = get_family_down(context.collection) if self.recursive else (context.collection, )
+        cols = get_family_down(context.collection) if self.recursive else (context.collection,)
         for col in cols:
             for obj in col.objects:
-                obj.name = col.name
+                if self.remove_trailing_numbers:
+                    name = obj.name
+                    search = re.search("\.[0-9]+$", name)
+                    if search:
+                        obj.name = name[0 : search.start()]
+                else:
+                    obj.name = col.name if self.as_collection else obj.name.replace(self.replace_from, self.replace_to)
                 if hasattr(obj, "data") and obj.data is not None:
-                    obj.data.name = col.name
+                    obj.data.name = obj.name
 
         return {"FINISHED"}
