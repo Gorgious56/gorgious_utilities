@@ -17,13 +17,7 @@ def draw_modifiers_properties(self, context):
     row.operator("modifier.desync", text="Desynch", icon="UNLINKED")
 
 
-def draw_select_used_booleans(self, context):
-    self.layout.operator("modifier.select_used_booleans")
-
-
-menus_appends = {
-    bpy.types.VIEW3D_MT_select_object: draw_select_used_booleans,
-}
+menus_appends = {}
 menus_prepends = {
     bpy.types.DATA_PT_modifiers: draw_modifiers_properties,
 }
