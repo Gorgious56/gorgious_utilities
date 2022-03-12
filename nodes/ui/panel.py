@@ -22,3 +22,4 @@ class GU_PT_node_editor_qol(bpy.types.Panel):
         row.operator("nodes.select_by_type", text="", icon="VIEWZOOM")
 
         layout.operator("nodes.refresh_hidden_sockets", icon="HIDE_ON")
+        layout.operator("nodes.create_factor_input", icon="ADD")
