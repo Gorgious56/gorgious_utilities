@@ -5,7 +5,7 @@ from gorgious_utilities.nodes.helper import get_active_node_tree, get_node_types
 
 class GU_OT_nodes_color_by_type(bpy.types.Operator):
     bl_idname = "nodes.color_by_type"
-    bl_label = "Color all nodes of a given type"
+    bl_label = "Color By Type"
     bl_options = {"UNDO", "REGISTER"}
 
     @classmethod
