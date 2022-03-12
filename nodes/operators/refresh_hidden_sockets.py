@@ -1,22 +1,17 @@
-from xml.dom.minicompat import NodeList
 import bpy
-from gorgious_utilities.nodes.helper import get_active_node_tree
+from gorgious_utilities.nodes.operators.helper import NodeTreeOperator, get_active_node_tree
 
 
-class GU_OT_nodes_refresh_hidden_sockets(bpy.types.Operator):
+class GU_OT_nodes_refresh_hidden_sockets(bpy.types.Operator, NodeTreeOperator):
     bl_idname = "nodes.refresh_hidden_sockets"
     bl_label = "Refresh Hidden Sockets"
-    bl_options = {"UNDO", "REGISTER"}
-
-    @classmethod
-    def poll(cls, context):
-        return get_active_node_tree(context) is not None
 
     def execute(self, context):
         nodes = get_active_node_tree(context).nodes
         previously_selected_nodes = context.selected_nodes
-        for node in nodes:
+        for node in previously_selected_nodes:
             node.select = False
+        for node in nodes:
             inputs_outputs = list(node.inputs) + list(node.outputs)
             for io in inputs_outputs:
                 if io.hide:
