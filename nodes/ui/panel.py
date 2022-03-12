@@ -9,12 +9,16 @@ class GU_PT_node_editor_qol(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator("nodes.color_by_type")
+        layout.operator("nodes.color_by_type", icon="COLORSET_02_VEC")
+
         row = layout.row(align=True)
-        row.operator("nodes.select_by_type")
         active_node = context.active_node
         if active_node is not None:
-            print(active_node)
             row.operator_context = "EXEC_DEFAULT"
-            op = row.operator("nodes.select_by_type", text="", icon="RESTRICT_SELECT_OFF")
+        op = row.operator("nodes.select_by_type", icon="RESTRICT_SELECT_OFF")
+        if active_node is not None:
             op.node_type = active_node.type
+            row.operator_context = "INVOKE_DEFAULT"
+        row.operator("nodes.select_by_type", text="", icon="VIEWZOOM")
+
+        layout.operator("nodes.refresh_hidden_sockets", icon="HIDE_ON")
