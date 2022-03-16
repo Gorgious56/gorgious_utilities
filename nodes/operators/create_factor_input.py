@@ -7,6 +7,7 @@ class GU_OT_nodes_Hidden(bpy.types.Operator, NodeTreeOperator):
     bl_label = "Create Factor Input"
 
     default_value: bpy.props.FloatProperty(name="Default Value", min=0, max=1)
+    name: bpy.props.StringProperty(name="Name")
 
     @classmethod
     def poll(cls, context):
@@ -34,5 +35,6 @@ class GU_OT_nodes_Hidden(bpy.types.Operator, NodeTreeOperator):
         new_mix = nodes.new(mix_type)
         new_mix.inputs[0].default_value = self.default_value
         tree.links.new(input.outputs[-1], new_mix.inputs[0])
+        input.outputs[-2].name = self.name or "Fac"
         nodes.remove(new_mix)
         return {"FINISHED"}
