@@ -31,7 +31,7 @@ class GU_OT_clean_sort_view_layers(bpy.types.Operator):
             layer_cols = get_collection_layers_from_collections(new, list(get_family_down(context.scene.collection)))
             for l_c in layer_cols:
                 l_c.exclude = states[l_c.name]
-            copy_struct(context.scene.view_layers[v_l_name + self.TEMP_NAME], new, ignore=["name"])
+            copy_struct(context.scene.view_layers[v_l_name + self.TEMP_NAME], new, ignore=["name", "original"])
         for v_l_name in names_sorted:
             context.scene.view_layers.remove(context.scene.view_layers[v_l_name + self.TEMP_NAME])
         context.window.view_layer = context.scene.view_layers[active_view_layer_name]

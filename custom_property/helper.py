@@ -7,6 +7,25 @@ def get_all_ui_props(obj):
         yield k
 
 
+def copy_struct(source, target, ignore=None):
+    if ignore is None:
+        ignore = []
+    if not source or not target or not hasattr(source, "bl_rna"):
+        return
+    for name, prop in source.bl_rna.properties.items():
+        if name == "rna_type" or name in ignore:
+            continue
+        try:
+            prop_value = getattr(source, name)
+            setattr(target, name, prop_value)
+        except AttributeError:
+            new_source = getattr(source, name)
+            new_target = getattr(target, name)
+            copy_struct(new_source, new_target, ignore)
+        except TypeError:
+            pass
+
+
 def copy_all_custom_props(source, target):
     "Copies ALL custom props from source to target"
     target.id_properties_ensure()
