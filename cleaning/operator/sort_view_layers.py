@@ -1,28 +1,14 @@
 import bpy
 from collections import defaultdict
 from gorgious_utilities.collection.helper import get_collection_layers_from_collections, get_family_down
+from gorgious_utilities.custom_property.helper import copy_struct
 
-
-def copy_struct(source, target):
-    if not source or not target:
-        return
-    for name, prop in source.bl_rna.properties.items():
-        if name == "rna_type":
-            continue
-        try:
-            setattr(target, name, getattr(source, name))
-        except AttributeError:
-            new_source = getattr(source, name)
-            new_target = getattr(target, name)
-            if hasattr(new_source, "bl_rna"):
-                copy_struct(new_source, new_target)
-        except TypeError:
-            pass
 
 class GU_OT_clean_sort_view_layers(bpy.types.Operator):
     bl_idname = "clean.sort_view_layers"
     bl_label = "Sort View Layers"
     bl_options = {"UNDO"}
+    TEMP_NAME = "__TEMPORARY_VIEW_LAYER__"
 
     def execute(self, context):
         active_view_layer_name = context.window.view_layer.name
@@ -36,11 +22,8 @@ class GU_OT_clean_sort_view_layers(bpy.types.Operator):
             for lc in layer_cols:
                 l_c_mapping[view_layer.name][lc.name] = lc.exclude
 
-        # context.scene.view_layers.new("__TEMPORARY_VIEW_LAYER__")  # Proxy that lets us remove all the other view layers
         for v_l in context.scene.view_layers:
-            v_l.name = v_l.name + "__TEMPORARY_VIEW_LAYER__"
-        # for v_l_name in names_sorted:
-        #     context.scene.view_layers.remove(context.scene.view_layers[v_l_name])
+            v_l.name = v_l.name + self.TEMP_NAME
         for v_l_name in names_sorted:
             new = context.scene.view_layers.new(v_l_name)
             context.window.view_layer = new
@@ -48,9 +31,9 @@ class GU_OT_clean_sort_view_layers(bpy.types.Operator):
             layer_cols = get_collection_layers_from_collections(new, list(get_family_down(context.scene.collection)))
             for l_c in layer_cols:
                 l_c.exclude = states[l_c.name]
-        # context.scene.view_layers.remove(context.scene.view_layers["__TEMPORARY_VIEW_LAYER__"])
+            copy_struct(context.scene.view_layers[v_l_name + self.TEMP_NAME], new, ignore=["name"])
         for v_l_name in names_sorted:
-            context.scene.view_layers.remove(context.scene.view_layers[v_l_name])
+            context.scene.view_layers.remove(context.scene.view_layers[v_l_name + self.TEMP_NAME])
         context.window.view_layer = context.scene.view_layers[active_view_layer_name]
         return {"FINISHED"}
 
