@@ -23,6 +23,13 @@ def get_collection_layer_from_collection(view_layer, collection):
             return col_layer
 
 
+def get_collection_layers_from_collection(view_layer, collection):
+    layer_collections = get_family_down(view_layer.layer_collection)
+    for col_layer in layer_collections:
+        if col_layer.collection == collection:
+            yield col_layer
+
+
 def get_collection_layers_from_collections(view_layer, collections):
     layer_collections = get_family_down(view_layer.layer_collection)
     for col_layer in layer_collections:
