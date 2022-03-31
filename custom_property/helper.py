@@ -1,3 +1,5 @@
+import re
+
 def get_all_ui_props(obj):
     items = obj.items()
     rna_properties = {prop.identifier for prop in obj.bl_rna.properties if prop.is_runtime}
@@ -5,6 +7,13 @@ def get_all_ui_props(obj):
         if k in rna_properties:
             continue
         yield k
+
+
+def remove_trailing_numbers(obj, prop_name):    
+    name = getattr(obj, prop_name)
+    search = re.search("\.[0-9]+$", name)
+    if search:
+        setattr(obj, prop_name, name[0 : search.start()])
 
 
 def copy_struct(source, target, ignore=None):

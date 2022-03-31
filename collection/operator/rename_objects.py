@@ -1,8 +1,8 @@
-import re
 import bpy
 from gorgious_utilities.collection.helper import (
     get_family_down,
 )
+from gorgious_utilities.custom_property.helper import remove_trailing_numbers
 
 
 class GU_OT_collection_rename_objects(bpy.types.Operator):
@@ -36,13 +36,12 @@ class GU_OT_collection_rename_objects(bpy.types.Operator):
 
     def execute(self, context):
         cols = get_family_down(context.collection) if self.recursive else (context.collection,)
-        for col in cols:
+        for col in cols:            
+            if self.remove_trailing_numbers:
+                remove_trailing_numbers(col, "name")
             for obj in col.objects:
                 if self.remove_trailing_numbers:
-                    name = obj.name
-                    search = re.search("\.[0-9]+$", name)
-                    if search:
-                        obj.name = name[0 : search.start()]
+                    remove_trailing_numbers(obj, "name")
                 else:
                     obj.name = col.name if self.as_collection else obj.name.replace(self.replace_from, self.replace_to)
                 if hasattr(obj, "data") and obj.data is not None:
