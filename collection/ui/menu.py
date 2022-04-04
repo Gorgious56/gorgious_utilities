@@ -17,7 +17,7 @@ def draw_blueprint_collection_toggle(self, _):
 
 def draw_exclude_collections_from_object(self, context):
     layout = self.layout
-    for col_layer in get_collection_layers_from_collections(context.view_layer, context.active_object.users_collection):
+    for col_layer in get_collection_layers_from_collections(context.view_layer.layer_collection, context.active_object.users_collection):
         split = layout.split(align=True, factor=0.4)
         split.label(text=col_layer.name)
         split.prop(col_layer, "exclude", text="")
@@ -36,7 +36,7 @@ def draw_outliner_collection_context(self, context):
     layout.operator("collection.move_selected_to_this", text="Move Selected Objects to this Collection")
 
     col = next(_id for _id in context.selected_ids if isinstance(_id, bpy.types.Collection))
-    layer_col = get_collection_layer_from_collection(context.view_layer, col)
+    layer_col = get_collection_layer_from_collection(context.view_layer.layer_collection, col)
     exclude = layer_col.exclude
     op = layout.operator(
         "collection.include_or_exclude_from_all_view_layers",

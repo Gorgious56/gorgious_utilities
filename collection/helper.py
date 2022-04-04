@@ -2,7 +2,7 @@ from collections import defaultdict
 import bpy
 
 
-def get_parent(col):
+def get_parent(col: bpy.types.Collection) -> bpy.types.Collection:
     for c in bpy.data.collections:
         if col.name in c.children:
             return c
@@ -16,22 +16,22 @@ def get_family_down(col, include_parent=True):
         yield from get_family_down(child, include_parent=True)
 
 
-def get_collection_layer_from_collection(view_layer, collection):
-    layer_collections = get_family_down(view_layer.layer_collection)
+def get_collection_layer_from_collection(layer_collection_parent, collection):
+    layer_collections = get_family_down(layer_collection_parent)
     for col_layer in layer_collections:
         if col_layer.collection == collection:
             return col_layer
 
 
-def get_collection_layers_from_collection(view_layer, collection):
-    layer_collections = get_family_down(view_layer.layer_collection)
+def get_collection_layers_from_collection(layer_collection_parent, collection):
+    layer_collections = get_family_down(layer_collection_parent)
     for col_layer in layer_collections:
         if col_layer.collection == collection:
             yield col_layer
 
 
-def get_collection_layers_from_collections(view_layer, collections):
-    layer_collections = get_family_down(view_layer.layer_collection)
+def get_collection_layers_from_collections(layer_collection_parent, collections):
+    layer_collections = get_family_down(layer_collection_parent)
     for col_layer in layer_collections:
         if col_layer.collection in collections:
             yield col_layer
@@ -51,7 +51,7 @@ def get_tree(col):
     return tree, all_cols
 
 
-def copy_collection_attributes(view_layers, col_from, col_to):
+def copy_collection_attributes(col_from, col_to):
     for attr in dir(col_from):
         if attr == "name":
             continue
@@ -59,8 +59,12 @@ def copy_collection_attributes(view_layers, col_from, col_to):
             setattr(col_to, attr, getattr(col_from, attr))
         except AttributeError:
             continue
+
+
+def copy_layer_collection_attributes(view_layers, col_from, col_to):
     for v_l in view_layers:
-        layer_col_from, layer_col_to = get_collection_layers_from_collections(v_l, (col_from, col_to))
+        layer_col_from = get_collection_layer_from_collection(v_l.layer_collection, col_from)
+        layer_col_to = get_collection_layer_from_collection(v_l.layer_collection, col_to)
         for attr in dir(layer_col_from):
             try:
                 setattr(layer_col_to, attr, getattr(layer_col_from, attr))

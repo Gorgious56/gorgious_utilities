@@ -23,7 +23,7 @@ class GU_PT_collection_properties_utilities(bpy.types.Panel):
         layout.operator_context = oc
 
         col = context.collection
-        layer_col = get_collection_layer_from_collection(context.view_layer, col)
+        layer_col = get_collection_layer_from_collection(context.view_layer.layer_collection, col)
         excluded = layer_col.exclude
         op = layout.operator(
             "collection.include_or_exclude_from_all_view_layers",

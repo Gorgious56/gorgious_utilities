@@ -16,7 +16,7 @@ class GU_OT_collection_include_or_exclude_from_all_view_layers(bpy.types.Operato
         col = bpy.data.collections.get(self.col_name)
         if col is not None:
             for view_layer in context.scene.view_layers:
-                layer_col = get_collection_layer_from_collection(view_layer, col)
+                layer_col = get_collection_layer_from_collection(view_layer.layer_collection, col)
                 layer_col.exclude = self.exclude
 
         return {"FINISHED"}

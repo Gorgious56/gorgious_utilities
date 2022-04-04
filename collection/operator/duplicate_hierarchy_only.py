@@ -3,6 +3,7 @@ from gorgious_utilities.collection.helper import (
     get_tree,
     get_parent,
     copy_collection_attributes,
+    copy_layer_collection_attributes,
 )
 
 class GU_OT_collection_duplicate_hierarchy_only(bpy.types.Operator):
@@ -28,6 +29,9 @@ class GU_OT_collection_duplicate_hierarchy_only(bpy.types.Operator):
         for coll in all_colls:
             new_coll = bpy.data.collections.new("")
             new_colls.append(new_coll)
+            copy_collection_attributes(coll, new_coll)
+            if self.replace_from != self.replace_to:
+                new_coll.name = coll.name.replace(self.replace_from, self.replace_to)
 
         for old_col_parent, old_cols in tree.items():
             for old_col in old_cols:
@@ -40,12 +44,12 @@ class GU_OT_collection_duplicate_hierarchy_only(bpy.types.Operator):
                     parent = new_colls[all_colls.index(old_col_parent)]
                 parent.children.link(child)
         
-        for i in range(len(all_colls)):
-            coll = all_colls[i]
-            new_coll = new_colls[i]
-            copy_collection_attributes(context.scene.view_layers, coll, new_coll)
-            if self.replace_from != self.replace_to:
-                new_coll.name = coll.name.replace(self.replace_from, self.replace_to)
+        # for i in range(len(all_colls)):
+        #     coll = all_colls[i]
+        #     new_coll = new_colls[i]
+        #     copy_layer_collection_attributes(context.scene.view_layers, coll, new_coll)
+        #     if self.replace_from != self.replace_to:
+        #         new_coll.name = coll.name.replace(self.replace_from, self.replace_to)
 
 
         return {"FINISHED"}

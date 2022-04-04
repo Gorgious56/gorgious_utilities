@@ -17,7 +17,7 @@ class GU_OT_clean_sort_view_layers(bpy.types.Operator):
         l_c_mapping = defaultdict(dict)
         for view_layer in view_layers:
             layer_cols = set(
-                get_collection_layers_from_collections(view_layer, list(get_family_down(context.scene.collection)))
+                get_collection_layers_from_collections(view_layer.layer_collection, list(get_family_down(context.scene.collection)))
             )
             for lc in layer_cols:
                 l_c_mapping[view_layer.name][lc.name] = lc.exclude
@@ -28,7 +28,7 @@ class GU_OT_clean_sort_view_layers(bpy.types.Operator):
             new = context.scene.view_layers.new(v_l_name)
             context.window.view_layer = new
             states = l_c_mapping[v_l_name]
-            layer_cols = get_collection_layers_from_collections(new, list(get_family_down(context.scene.collection)))
+            layer_cols = get_collection_layers_from_collections(new.layer_collection, list(get_family_down(context.scene.collection)))
             for l_c in layer_cols:
                 l_c.exclude = states[l_c.name]
             copy_struct(context.scene.view_layers[v_l_name + self.TEMP_NAME], new, ignore=["name", "original"])
