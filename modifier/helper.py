@@ -24,18 +24,12 @@ def get_output_attributes(self, context):
     o = context.active_object
     mod = o.modifiers[self.mod_name]
     node_tree = mod.node_group
-    # output_node = next(n for n in node_tree.nodes if isinstance(n, bpy.types.NodeGroupOutput))
-    # inputs = output_node.inputs
-    # for output in inputs:
-    #     print(output)
-
-    # for k, v in mod.items():
-    #     prop_rna = (mod.id_properties_ui(k))
-    #     print(prop_rna.as_dict())
-
-    for ui_prop in get_all_ui_props(mod):
-        if ui_prop.startswith("Output"):
-            yield (ui_prop,) * 3
+    output_node = next((n for n in node_tree.nodes if isinstance(n, bpy.types.NodeGroupOutput)), None)
+    if output_node is None:
+        return ("",) * 3
+    inputs = output_node.inputs
+    for input in inputs[1:-1]:
+        yield (input.identifier + "_attribute_name", input.name, input.identifier)
 
 
 def mod_equality(mod1, mod2, ignore=["name"]):
