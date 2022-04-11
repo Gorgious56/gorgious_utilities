@@ -2,8 +2,6 @@ import bpy
 
 
 class GU_OT_toggle_object_render(bpy.types.Operator):
-    """Tooltip"""
-
     bl_idname = "object.toggle_render"
     bl_label = "Toggle Render"
     bl_options = {"UNDO"}

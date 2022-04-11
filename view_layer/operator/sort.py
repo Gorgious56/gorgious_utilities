@@ -4,8 +4,8 @@ from gorgious_utilities.collection.helper import get_collection_layers_from_coll
 from gorgious_utilities.custom_property.helper import copy_struct
 
 
-class GU_OT_clean_sort_view_layers(bpy.types.Operator):
-    bl_idname = "clean.sort_view_layers"
+class GU_OT_view_layers_sort(bpy.types.Operator):
+    bl_idname = "view_layers.sort"
     bl_label = "Sort View Layers"
     bl_options = {"UNDO"}
     TEMP_NAME = "__TEMPORARY_VIEW_LAYER__"

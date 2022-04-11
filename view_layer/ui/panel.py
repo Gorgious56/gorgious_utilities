@@ -8,6 +8,10 @@ class GU_PT_view_layer_stored_view(bpy.types.Panel):
     bl_region_type = "WINDOW"
     bl_context = "view_layer"
 
+    @classmethod
+    def poll(cls, context):
+        return False
+
     def draw(self, context):
         scene = context.scene
         layout = self.layout
@@ -39,3 +43,5 @@ class GU_PT_view_layer_stored_view(bpy.types.Panel):
         load_op.index = index
         load_op.save_or_load = True
         sub_row.enabled = index >= 0  # Prevent loading view if it doesn't exist
+
+        layout.operator("view_layer.update_stored_view_on_change")
