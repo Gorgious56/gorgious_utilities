@@ -33,7 +33,10 @@ def draw_outliner_collection_context(self, context):
     layout = self.layout
     layout.separator()
     layout.operator("collection.rename_objects", text="Rename Objects")
-    layout.operator("collection.move_selected_to_this", text="Move Selected Objects to this Collection")
+    op = layout.operator("collection.move_selected_to_this", text="Move Selected Objects to Collection")
+    op.unlink_others = True
+    op = layout.operator("collection.move_selected_to_this", text="Add Selected Objects to Collection")
+    op.unlink_others = False
 
     col = next(_id for _id in context.selected_ids if isinstance(_id, bpy.types.Collection))
     layer_col = get_collection_layer_from_collection(context.view_layer.layer_collection, col)
