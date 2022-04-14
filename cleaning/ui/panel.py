@@ -26,12 +26,14 @@ class GU_PT_clean_view_layer(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator("view_layers.sort")
+        layout.operator("view_layers.sort", icon="SORTALPHA")
         row = layout.row(align=True)
         op = row.operator("view_layer.toggle_layer_collections", text="Enable all Collections", icon="CHECKBOX_HLT")
         op.action = "ON"
         op = row.operator("view_layer.toggle_layer_collections", text="Disable all Collections", icon="CHECKBOX_DEHLT")
         op.action = "OFF"
+
+        layout.operator("view_layer.delete", icon="TRASH")
 
 
 class GU_PT_clean_scene_drivers(bpy.types.Panel):
