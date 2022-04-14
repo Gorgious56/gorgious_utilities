@@ -35,6 +35,8 @@ class GU_PT_clean_view_layer(bpy.types.Panel):
 
         layout.operator("view_layer.delete", icon="TRASH")
 
+        layout.operator("view_layer.show_included", icon="HIDE_OFF")
+
 
 class GU_PT_clean_scene_drivers(bpy.types.Panel):
     bl_label = "Drivers"
