@@ -15,7 +15,6 @@ class GU_OT_view_layer_delete(bpy.types.Operator):
         return len(context.scene.view_layers) > 1
 
     def invoke(self, context, event):
-        self.v_l_name = context.view_layer.name
         return context.window_manager.invoke_props_dialog(self)
 
     def execute(self, context):
