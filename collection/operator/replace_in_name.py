@@ -12,7 +12,10 @@ class GU_OT_collection_replace_in_name(bpy.types.Operator):
 
     replace_from: bpy.props.StringProperty(name="Replace")
     replace_to: bpy.props.StringProperty(name="With")
+    max_occurences: bpy.props.IntProperty(name="Replace Occurences", default=1) 
     replace_children: bpy.props.BoolProperty(name="Replace in children", default=True)
+    replace_objects: bpy.props.BoolProperty(name="Replace in objects", default=False)
+    remove_trailing_numbers: bpy.props.BoolProperty(name="Remove trailing numbers", default=True)
 
     def invoke(self, context, event):
         self.replace_from = self.replace_to = context.collection.name
@@ -33,6 +36,16 @@ class GU_OT_collection_replace_in_name(bpy.types.Operator):
             if self.replace_children:
                 cols.update(get_family_down(col))
         for col in cols:
-            col.name = col.name.replace(self.replace_from, self.replace_to)
+            col.name = col.name.replace(self.replace_from, self.replace_to, self.max_occurences)
+
+        if self.replace_objects:
+            objs = set()
+            for col in selected_cols:
+                objs.update(col.all_objects)
+            for obj in objs:
+                obj.name = obj.name.replace(self.replace_from, self.replace_to, self.max_occurences)
+
+        if self.remove_trailing_numbers:
+            bpy.ops.collection.rename_objects(remove_trailing_numbers=True)
         return {"FINISHED"}
 
