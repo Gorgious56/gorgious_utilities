@@ -16,7 +16,7 @@ class GU_OT_modifier_replace_a_with_b(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return any(m for m in context.active_object.modifiers if m.type == "NODES")
+        return context.active_object and any(m for m in context.active_object.modifiers if m.type == "NODES")
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
