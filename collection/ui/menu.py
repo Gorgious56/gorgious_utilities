@@ -17,12 +17,16 @@ def draw_blueprint_collection_toggle(self, _):
 
 def draw_exclude_collections_from_object(self, context):
     layout = self.layout
-    for col_layer in get_collection_layers_from_collections(context.view_layer.layer_collection, context.active_object.users_collection):
+    for col_layer in get_collection_layers_from_collections(
+        context.view_layer.layer_collection, context.active_object.users_collection
+    ):
         split = layout.split(align=True, factor=0.4)
         split.label(text=col_layer.name)
         split.prop(col_layer, "exclude", text="")
         col_name = col_layer.collection.name
-        col = bpy.data.collections[col_name]
+        col = bpy.data.collections.get(col_name)
+        if col is None:
+            continue
         split.prop(col, "hide_select", text="")
         split.prop(col_layer, "hide_viewport", text="")
         split.prop(col, "hide_viewport", text="")
@@ -47,7 +51,6 @@ def draw_outliner_collection_context(self, context):
     )
     op.col_name = col.name
     op.exclude = not exclude
-
 
 
 menus_appends = {
