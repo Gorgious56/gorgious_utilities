@@ -6,7 +6,8 @@ Currently there are Disc, Squares and Stripes.
 """
 
 import bpy
-from gorgious_utilities.grease_pencil.helper import GPHatchGenerator
+from gorgious_utilities.grease_pencil.helper.hatch import GPHatchGenerator
+
 
 
 class GU_OT_gpencil_generate_hatches(bpy.types.Operator):

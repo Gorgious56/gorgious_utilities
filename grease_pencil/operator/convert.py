@@ -1,5 +1,5 @@
 import bpy
-from gorgious_utilities.grease_pencil.helper import convert_gpencil_to_curve, convert_gpencil_to_mesh
+from gorgious_utilities.grease_pencil.helper.curve import convert_gpencil_to_curve, convert_gpencil_to_mesh
 
 
 # def retrieve_col_names(self, context):
