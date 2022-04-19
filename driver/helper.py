@@ -1,7 +1,7 @@
 import bpy
 
 
-def add_driver_to(obj, prop_to, variables, expression):
+def add_driver_to(obj, prop_to, variables, expression=None):
     """
     Add a driver to obj's prop_to property
     """
@@ -28,7 +28,7 @@ def add_driver_to(obj, prop_to, variables, expression):
         target.id = var_prop[2]
         target.data_path = str(var_prop[3])
 
-    if expression:
+    if expression is not None:
         driver.expression = expression
     else:
         driver.expression = variables[0][0]

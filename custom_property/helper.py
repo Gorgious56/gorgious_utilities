@@ -1,5 +1,8 @@
 import re
 
+from gorgious_utilities.driver.helper import add_driver_to
+
+
 def get_all_ui_props(obj):
     items = obj.items()
     rna_properties = {prop.identifier for prop in obj.bl_rna.properties if prop.is_runtime}
@@ -9,7 +12,7 @@ def get_all_ui_props(obj):
         yield k
 
 
-def remove_trailing_numbers(obj, prop_name):    
+def remove_trailing_numbers(obj, prop_name):
     name = getattr(obj, prop_name)
     search = re.search("\.[0-9]+$", name)
     if search:
@@ -35,15 +38,15 @@ def copy_struct(source, target, ignore=None):
             pass
 
 
-def copy_all_custom_props(source, target):
+def copy_all_custom_props(source, target, drive=False):
     "Copies ALL custom props from source to target"
     target.id_properties_ensure()
     source.id_properties_ensure()
     for prop_name in get_all_ui_props(source):
-        copy_custom_prop(source, target, prop_name, ensure=False)
+        copy_custom_prop(source, target, prop_name, ensure=False, drive=drive)
 
 
-def copy_custom_prop(source, target, prop_name, ensure=True):
+def copy_custom_prop(source, target, prop_name, ensure=True, drive=False):
     "Copies custom prop from source to target"
     if ensure:
         target.id_properties_ensure()
@@ -55,9 +58,23 @@ def copy_custom_prop(source, target, prop_name, ensure=True):
     target[prop_name] = source[prop_name]
     prop_data_target = target.id_properties_ui(prop_name)
     prop_data_target.update_from(prop_data_source)
+    prop_name_custom = f'["{prop_name}"]'
     target.property_overridable_library_set(
-        f'["{prop_name}"]', source.is_property_overridable_library(f'["{prop_name}"]')
+        prop_name_custom, source.is_property_overridable_library(prop_name_custom)
     )
+    if drive:
+        add_driver_to(
+            obj=target,
+            prop_to=prop_name_custom,
+            variables=(
+                (
+                    "prop",
+                    "OBJECT",
+                    source,
+                    prop_name_custom,
+                ),
+            ),
+        )
 
 
 def retrieve_props(self, context):

@@ -6,15 +6,16 @@ from gorgious_utilities.custom_property.helper import (
 
 
 class GU_OT_property_copy_single(bpy.types.Operator):
-    """Copies a custom prop from active to selected objects"""
-
     bl_idname = "property.copy_single"
     bl_label = "Copy ONE Custom Property"
+    bl_description = "Copies a custom prop from active to selected objects"
+
     bl_options = {"UNDO"}
 
     prop_name: bpy.props.EnumProperty(
         name="Name", items=lambda self, context: ((p, p, p) for p in get_all_ui_props(context.active_object))
     )
+    drive_prop: bpy.props.BoolProperty(name="Setup Driver")
 
     @classmethod
     def poll(cls, context):
@@ -28,5 +29,5 @@ class GU_OT_property_copy_single(bpy.types.Operator):
         for target in context.selected_editable_objects:
             if target == source:
                 continue
-            copy_custom_prop(source, target, self.prop_name)
+            copy_custom_prop(source, target, self.prop_name, drive=self.drive_prop)
         return {"FINISHED"}
