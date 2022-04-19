@@ -24,6 +24,8 @@ def get_output_attributes(self, context):
     o = context.active_object
     mod = o.modifiers[self.mod_name]
     node_tree = mod.node_group
+    if node_tree is None:
+        return ("",) * 3
     output_node = next((n for n in node_tree.nodes if isinstance(n, bpy.types.NodeGroupOutput)), None)
     if output_node is None:
         return ("",) * 3
