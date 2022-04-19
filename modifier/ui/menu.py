@@ -1,4 +1,5 @@
 import bpy
+from gorgious_utilities.core.menu import GU_Menu
 
 
 def draw_modifiers_properties(self, context):
@@ -17,21 +18,15 @@ def draw_modifiers_properties(self, context):
     row.operator("modifier.desync", text="Desynch", icon="UNLINKED")
 
 
-menus_appends = {}
-menus_prepends = {
-    bpy.types.DATA_PT_modifiers: draw_modifiers_properties,
-}
+class GU_Menu_Modifier(GU_Menu):
+    prepends = {
+        bpy.types.DATA_PT_modifiers: draw_modifiers_properties,
+    }
 
 
 def register():
-    for menu, draw in menus_appends.items():
-        menu.append(draw)
-    for menu, draw in menus_prepends.items():
-        menu.prepend(draw)
+    GU_Menu_Modifier.register()
 
 
 def unregister():
-    for menu, draw in menus_appends.items():
-        menu.remove(draw)
-    for menu, draw in menus_prepends.items():
-        menu.remove(draw)
+    GU_Menu_Modifier.unregister()

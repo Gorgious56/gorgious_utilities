@@ -1,25 +1,20 @@
 import bpy
+from gorgious_utilities.core.menu import GU_Menu
 
 
 def draw_toggle_render_object_context(self, _):
     self.layout.operator("object.toggle_render", text="Toggle Render")
 
 
-menus_appends = {
-    bpy.types.VIEW3D_MT_object_context_menu: draw_toggle_render_object_context,
-}
-menus_prepends = {}
+class GU_Menu_Object(GU_Menu):
+    appends = {
+        bpy.types.VIEW3D_MT_object_context_menu: draw_toggle_render_object_context,
+    }
 
 
 def register():
-    for menu, draw in menus_appends.items():
-        menu.append(draw)
-    for menu, draw in menus_prepends.items():
-        menu.prepend(draw)
+    GU_Menu_Object.register()
 
 
 def unregister():
-    for menu, draw in menus_appends.items():
-        menu.remove(draw)
-    for menu, draw in menus_prepends.items():
-        menu.remove(draw)
+    GU_Menu_Object.unregister()

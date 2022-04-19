@@ -1,4 +1,5 @@
 import bpy
+from gorgious_utilities.core.menu import GU_Menu
 
 
 def draw_custom_props_links(self, _):
@@ -11,22 +12,16 @@ def draw_update_viewport_material(self, _):
     )
 
 
-menus_appends = {
-    bpy.types.VIEW3D_MT_make_links: draw_custom_props_links,
-    bpy.types.MATERIAL_MT_context_menu: draw_update_viewport_material,
-}
-menus_prepends = {}
+class GU_Menu_Material(GU_Menu):
+    appends = {
+        bpy.types.VIEW3D_MT_make_links: draw_custom_props_links,
+        bpy.types.MATERIAL_MT_context_menu: draw_update_viewport_material,
+    }
 
 
 def register():
-    for menu, draw in menus_appends.items():
-        menu.append(draw)
-    for menu, draw in menus_prepends.items():
-        menu.prepend(draw)
+    GU_Menu_Material.register()
 
 
 def unregister():
-    for menu, draw in menus_appends.items():
-        menu.remove(draw)
-    for menu, draw in menus_prepends.items():
-        menu.remove(draw)
+    GU_Menu_Material.unregister()

@@ -1,4 +1,5 @@
 import bpy
+from gorgious_utilities.core.menu import GU_Menu
 
 
 def draw_new_mesh_objects(self, _):
@@ -10,22 +11,16 @@ def draw_print_mesh_count(self, _):
     self.layout.operator("mesh.print_highest_verts_count")
 
 
-menus_appends = {
-    bpy.types.VIEW3D_MT_mesh_add: draw_new_mesh_objects,
-    bpy.types.VIEW3D_MT_object_cleanup: draw_print_mesh_count,
-}
-menus_prepends = {}
+class GU_Menu_Mesh(GU_Menu):
+    appends = {
+        bpy.types.VIEW3D_MT_mesh_add: draw_new_mesh_objects,
+        bpy.types.VIEW3D_MT_object_cleanup: draw_print_mesh_count,
+    }
 
 
 def register():
-    for menu, draw in menus_appends.items():
-        menu.append(draw)
-    for menu, draw in menus_prepends.items():
-        menu.prepend(draw)
+    GU_Menu_Mesh.register()
 
 
 def unregister():
-    for menu, draw in menus_appends.items():
-        menu.remove(draw)
-    for menu, draw in menus_prepends.items():
-        menu.remove(draw)
+    GU_Menu_Mesh.unregister()

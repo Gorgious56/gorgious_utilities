@@ -3,6 +3,7 @@ from gorgious_utilities.collection.helper import (
     get_collection_layers_from_collections,
     get_collection_layer_from_collection,
 )
+from gorgious_utilities.core.menu import GU_Menu
 
 
 def draw_boolean_collection_toggle(self, _):
@@ -53,24 +54,18 @@ def draw_outliner_collection_context(self, context):
     op.exclude = not exclude
 
 
-menus_appends = {
-    bpy.types.VIEW3D_MT_view: draw_boolean_collection_toggle,
-    bpy.types.VIEW3D_MT_view: draw_blueprint_collection_toggle,
-    bpy.types.OUTLINER_MT_collection: draw_outliner_collection_context,
-    bpy.types.OBJECT_PT_collections: draw_exclude_collections_from_object,
-}
-menus_prepends = {}
+class GU_Menu_Collection(GU_Menu):
+    appends = {
+        bpy.types.VIEW3D_MT_view: draw_boolean_collection_toggle,
+        bpy.types.VIEW3D_MT_view: draw_blueprint_collection_toggle,
+        bpy.types.OUTLINER_MT_collection: draw_outliner_collection_context,
+        bpy.types.OBJECT_PT_collections: draw_exclude_collections_from_object,
+    }
 
 
 def register():
-    for menu, draw in menus_appends.items():
-        menu.append(draw)
-    for menu, draw in menus_prepends.items():
-        menu.prepend(draw)
+    GU_Menu_Collection.register()
 
 
 def unregister():
-    for menu, draw in menus_appends.items():
-        menu.remove(draw)
-    for menu, draw in menus_prepends.items():
-        menu.remove(draw)
+    GU_Menu_Collection.unregister()
