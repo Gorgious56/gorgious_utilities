@@ -3,7 +3,7 @@ from gorgious_utilities.collection.helper import (
     get_collection_layers_from_collections,
     get_collection_layer_from_collection,
 )
-from gorgious_utilities.core.menu import GU_Menu
+from gorgious_utilities.core.ui.menu_factory import GU_Menu
 
 
 def draw_boolean_collection_toggle(self, _):

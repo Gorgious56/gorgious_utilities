@@ -1,5 +1,5 @@
 import bpy
-from gorgious_utilities.core.menu import GU_Menu
+from gorgious_utilities.core.ui.menu_factory import GU_Menu
 
 
 def draw_modifiers_properties(self, context):
