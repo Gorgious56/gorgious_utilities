@@ -11,7 +11,9 @@ class GU_OT_display_by_custom_prop(Operator):
     bl_options = {"UNDO", "REGISTER"}
 
     display_type: EnumProperty(
-        name="Display On", items=(("color", "Object Color", "Change Object Color"),), default="color"
+        name="Display On",
+        items=(("color", "Object Color", "Change Object Color"),),
+        default="color",
     )
     prop_name: StringProperty(name="Custom Property Name")
 

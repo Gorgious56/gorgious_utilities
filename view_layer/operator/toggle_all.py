@@ -25,7 +25,7 @@ class GU_OT_view_layer_toggle_layer_collections(bpy.types.Operator):
     def execute(self, context):
         view_layer = context.view_layer if self.on_active else context.scene.view_layers.get(self.v_l_name)
         exclude = True if self.action == "OFF" else False
-        for layer_col in get_family_down(view_layer.layer_collection):
+        for layer_col in reversed(list(get_family_down(view_layer.layer_collection))):
             layer_col.exclude = exclude
         return {"FINISHED"}
 
