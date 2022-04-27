@@ -45,6 +45,8 @@ def draw_outliner_collection_context(self, context):
 
     col = next(_id for _id in context.selected_ids if isinstance(_id, bpy.types.Collection))
     layer_col = get_collection_layer_from_collection(context.view_layer.layer_collection, col)
+    if layer_col is None:
+        return
     exclude = layer_col.exclude
     op = layout.operator(
         "collection.include_or_exclude_from_all_view_layers",
