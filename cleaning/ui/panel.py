@@ -13,7 +13,8 @@ class GU_PT_clean_scene(bpy.types.Panel):
         layout = self.layout
 
         layout.operator("clean.remove_fake_users")
-        layout.operator("clean.remove_single_empties")
+        layout.operator("property.remove_all_in_file")
+        # layout.operator("clean.remove_single_empties")
 
 
 class GU_PT_clean_view_layer(bpy.types.Panel):
