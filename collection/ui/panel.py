@@ -1,8 +1,27 @@
 import bpy
 from rna_prop_ui import PropertyPanel
-from gorgious_utilities.collection.helper import (
+from gorgious_utilities.collection.tool import (
     get_collection_layer_from_collection,
+    get_collection_instances,
+    get_family_down,
 )
+
+
+class GU_PT_collection_properties_usage(bpy.types.Panel):
+    bl_label = "Usage"
+    bl_idname = "GU_PT_collection_properties_usage"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "collection"
+
+    def draw(self, context):
+        layout = self.layout
+        collection_instances = get_collection_instances()
+        number_of_uses = len([c_i for c_i in collection_instances if c_i.instance_collection == context.collection])
+        layout.label(text=f"Used {number_of_uses} times as collection instance")
+        layer_collections = get_family_down(context.view_layer.layer_collection)
+        number_of_links = len([l_c for l_c in layer_collections if l_c.collection == context.collection])
+        layout.label(text=f"Linked {number_of_links} times in current view layer")
 
 
 class GU_PT_collection_properties_utilities(bpy.types.Panel):
@@ -57,7 +76,7 @@ class GU_PT_collection_properties_utilities(bpy.types.Panel):
         layout.operator("collection.destructively_join_meshes", text="Destructively Join Meshes")
 
 
-class GU_PT_collection_custom_properties(bpy.types.Panel, PropertyPanel): 
+class GU_PT_collection_custom_properties(bpy.types.Panel, PropertyPanel):
     _context_path = "collection"
     _property_type = bpy.types.Collection
     bl_label = "Custom Properties"

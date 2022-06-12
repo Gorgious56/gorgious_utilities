@@ -1,7 +1,7 @@
 import bpy
 from gorgious_utilities.message.messagebox import show_message_box
 from gorgious_utilities.view_layer.helper import get_view_layer_names
-from gorgious_utilities.collection.helper import get_family_down
+from gorgious_utilities.collection.tool import get_family_down
 
 
 class GU_OT_view_layer_show_included(bpy.types.Operator):

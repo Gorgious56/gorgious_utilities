@@ -1,5 +1,5 @@
 import bpy
-from gorgious_utilities.collection.helper import (
+from gorgious_utilities.collection.tool import (
     get_collection_layers_from_collections,
     get_collection_layer_from_collection,
 )

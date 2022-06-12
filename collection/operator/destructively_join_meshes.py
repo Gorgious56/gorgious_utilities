@@ -1,5 +1,5 @@
 import bpy
-from gorgious_utilities.collection.helper import (
+from gorgious_utilities.collection.tool import (
     get_family_down,
 )
 
@@ -87,7 +87,7 @@ class GU_OT_collection_destructively_join_meshes(bpy.types.Operator):
         join_objects = [obj for obj in col_parent.all_objects if obj.type == "MESH"]
 
         if join_objects:
-            bpy.ops.object.join({"object": join_objects[0], "selected_editable_objects":join_objects})
+            bpy.ops.object.join({"object": join_objects[0], "selected_editable_objects": join_objects})
             join_objects[0].name = col_parent.name
 
         return {"FINISHED"}

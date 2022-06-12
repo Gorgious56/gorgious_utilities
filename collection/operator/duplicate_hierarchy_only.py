@@ -1,10 +1,11 @@
 import bpy
-from gorgious_utilities.collection.helper import (
+from gorgious_utilities.collection.tool import (
     get_tree,
     get_parent,
     copy_collection_attributes,
     copy_layer_collection_attributes,
 )
+
 
 class GU_OT_collection_duplicate_hierarchy_only(bpy.types.Operator):
     bl_idname = "collection.duplicate_hierarchy_only"
@@ -43,13 +44,12 @@ class GU_OT_collection_duplicate_hierarchy_only(bpy.types.Operator):
                 else:
                     parent = new_colls[all_colls.index(old_col_parent)]
                 parent.children.link(child)
-        
+
         # for i in range(len(all_colls)):
         #     coll = all_colls[i]
         #     new_coll = new_colls[i]
         #     copy_layer_collection_attributes(context.scene.view_layers, coll, new_coll)
         #     if self.replace_from != self.replace_to:
         #         new_coll.name = coll.name.replace(self.replace_from, self.replace_to)
-
 
         return {"FINISHED"}

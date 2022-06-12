@@ -1,5 +1,5 @@
 import bpy
-from gorgious_utilities.collection.helper import (
+from gorgious_utilities.collection.tool import (
     get_family_down,
 )
 
@@ -26,4 +26,3 @@ class GU_OT_collection_toggle_object_viewport(bpy.types.Operator):
                 layer_collections[index].exclude = exclude
 
         return {"FINISHED"}
-

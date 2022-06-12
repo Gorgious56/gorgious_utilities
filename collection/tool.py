@@ -70,3 +70,7 @@ def copy_layer_collection_attributes(view_layers, col_from, col_to):
                 setattr(layer_col_to, attr, getattr(layer_col_from, attr))
             except AttributeError:
                 continue
+
+
+def get_collection_instances():
+    return [o for o in bpy.data.objects if o.type == "EMPTY" and o.instance_type == "COLLECTION"]

@@ -1,8 +1,7 @@
 import bpy
-from gorgious_utilities.collection.helper import (
+from gorgious_utilities.collection.tool import (
     get_collection_layer_from_collection,
 )
-
 
 
 class GU_OT_collection_include_or_exclude_from_all_view_layers(bpy.types.Operator):
