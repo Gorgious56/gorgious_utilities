@@ -14,6 +14,7 @@ class GU_PT_clean_scene(bpy.types.Panel):
 
         layout.operator("clean.remove_fake_users")
         layout.operator("property.remove_all_in_file")
+        layout.operator("gu.convert_scene_to_mesh")
         # layout.operator("clean.remove_single_empties")
 
 
