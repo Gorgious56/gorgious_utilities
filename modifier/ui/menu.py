@@ -7,6 +7,7 @@ def draw_modifiers_properties(self, context):
     row = layout.row(align=True)
     row.operator("modifier.replace_gn_a_with_gn_b", icon="NODETREE")
     row.operator("modifier.replace_output_name", icon="GROUP_VCOL")
+    row.operator("gu.select_same_gn", icon="RESTRICT_SELECT_OFF")
 
     row = layout.row(align=True)
     sub_row = row.row(align=True)

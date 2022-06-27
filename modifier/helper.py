@@ -8,6 +8,18 @@ from gorgious_utilities.event.watcher import (
 )
 
 
+def get_geometry_nodes_groups_on_this_object(self, context):
+    groups = set()
+    for mod in context.active_object.modifiers:
+        if mod.type != "NODES" or mod.node_group is None:
+            continue
+        groups.add(mod.node_group.name)
+    groups = sorted(list(groups))
+    get_geometry_nodes_groups_on_this_object.groups = [(item,) * 3 for item in groups]
+    print([(item,) * 3 for item in groups])
+    return get_geometry_nodes_groups_on_this_object.groups
+
+
 def get_geometry_nodes_groups(self, context):
     get_geometry_nodes_groups.groups = []
     for ng in [ng for ng in bpy.data.node_groups if ng.bl_idname == "GeometryNodeTree"]:
