@@ -16,7 +16,6 @@ def get_geometry_nodes_groups_on_this_object(self, context):
         groups.add(mod.node_group.name)
     groups = sorted(list(groups))
     get_geometry_nodes_groups_on_this_object.groups = [(item,) * 3 for item in groups]
-    print([(item,) * 3 for item in groups])
     return get_geometry_nodes_groups_on_this_object.groups
 
 
