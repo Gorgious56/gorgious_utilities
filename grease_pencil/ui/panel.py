@@ -10,7 +10,7 @@ class GU_PT_grease_pencil(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object.type == "GPENCIL"
+        return context.active_object and context.active_object.type == "GPENCIL"
 
     def draw(self, context):
         layout = self.layout
