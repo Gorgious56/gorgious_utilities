@@ -14,9 +14,11 @@ class GU_PT_modifier_properties(Panel):
         return context.active_object
 
     def draw(self, context):
+        props = context.active_object.GUProps.modifier.modifier_inputs
         for mod in context.active_object.modifiers:
             if not isinstance(mod, NodesModifier):
                 continue
+            props_mod = props.get(mod.name)
             layout = self.layout
             box = layout.box()
             tree = mod.node_group
@@ -25,6 +27,9 @@ class GU_PT_modifier_properties(Panel):
             row = box.row(align=True)
             row.prop(mod, "show_expanded", text="")
             row.prop(mod, "name", text="")
+            op_show_all = row.operator("gu.modifier_show_input_in_viewport", icon="HIDE_OFF", text="")
+            op_show_all.modifier_name = mod.name
+            op_show_all.input_identifier = ""
             if not mod.show_expanded:
                 continue
             col = box.column(align=True)
@@ -33,6 +38,10 @@ class GU_PT_modifier_properties(Panel):
                     continue
                 row = col.row(align=True)
                 input_id = inp.identifier
+                if props_mod:
+                    props_input = props_mod.inputs.get(inp.identifier)
+                    if props_input is not None and not props_input.show:
+                        continue
                 input_use_attribute_path = input_id + "_use_attribute"
                 # For some reason we can't draw pointer types in the interface.
                 if mod[input_id] is None:
@@ -59,3 +68,6 @@ class GU_PT_modifier_properties(Panel):
                     )
                     toggle_attribute.prop_path = f'["{input_use_attribute_path}"]'
                     toggle_attribute.modifier_name = mod.name
+                op_show = row.operator("gu.modifier_show_input_in_viewport", icon="HIDE_ON", text="")
+                op_show.modifier_name = mod.name
+                op_show.input_identifier = input_id
