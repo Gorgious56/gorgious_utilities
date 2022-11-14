@@ -18,9 +18,22 @@ def draw_blueprint_collection_toggle(self, _):
 
 def draw_exclude_collections_from_object(self, context):
     layout = self.layout
-    for col_layer in get_collection_layers_from_collections(
+    collection_layers = list(get_collection_layers_from_collections(
         context.view_layer.layer_collection, context.active_object.users_collection
-    ):
+    ))
+    split = layout.split(align=True, factor=0.4)
+
+    split.label(text="All Collections")
+    state = not getattr(collection_layers[0], "exclude")
+    op = split.operator("gu.collections_state_toggle", text="", icon="CHECKBOX_HLT" if state else "CHECKBOX_DEHLT")
+    op.attribute = "exclude"
+    op.state = state
+    state = not getattr(collection_layers[0], "hide_viewport")
+    op = split.operator("gu.collections_state_toggle", text="", icon="HIDE_OFF" if state else "HIDE_ON")
+    op.attribute = "hide_viewport"
+    op.state = state
+
+    for col_layer in collection_layers:
         split = layout.split(align=True, factor=0.4)
         split.label(text=col_layer.name)
         split.prop(col_layer, "exclude", text="")
