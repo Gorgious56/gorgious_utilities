@@ -37,15 +37,27 @@ def get_collection_layers_from_collections(layer_collection_parent, collections)
             yield col_layer
 
 
+def get_hierarchy(layer_collection_parent, layer_col):
+    tree = get_tree(layer_collection_parent)[0]
+    parent = None
+    yield layer_col
+    while layer_col != layer_collection_parent:
+        for parent, children in tree.items():
+            if layer_col in children:
+                if parent != layer_collection_parent:
+                    yield parent
+                layer_col = parent
+
+
 def get_tree(col):
     tree = defaultdict(set)
     all_cols = []
 
-    def get_children_tree(tree, _col, parent=None):
-        tree[parent].add(_col)
-        all_cols.append(_col)
-        for child in _col.children:
-            get_children_tree(tree, child, _col)
+    def get_children_tree(tree, col, parent=None):
+        tree[parent].add(col)
+        all_cols.append(col)
+        for child in col.children:
+            get_children_tree(tree, child, col)
 
     get_children_tree(tree, col)
     return tree, all_cols

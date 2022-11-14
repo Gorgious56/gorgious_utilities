@@ -2,6 +2,7 @@ import bpy
 from gorgious_utilities.collection.tool import (
     get_collection_layers_from_collections,
     get_collection_layer_from_collection,
+    get_hierarchy,
 )
 from gorgious_utilities.core.ui.menu_factory import GU_Menu
 
@@ -32,19 +33,28 @@ def draw_exclude_collections_from_object(self, context):
     op = split.operator("gu.collections_state_toggle", text="", icon="HIDE_OFF" if state else "HIDE_ON")
     op.attribute = "hide_viewport"
     op.state = state
+    
+    all_layers = set(collection_layers)
+    for col_layer in collection_layers:
+        all_layers.update([l_c for l_c in get_hierarchy(context.view_layer.layer_collection, col_layer)])
 
     for col_layer in collection_layers:
-        split = layout.split(align=True, factor=0.4)
-        split.label(text=col_layer.name)
-        split.prop(col_layer, "exclude", text="")
-        col_name = col_layer.collection.name
-        col = bpy.data.collections.get(col_name)
-        if col is None:
-            continue
-        split.prop(col, "hide_select", text="")
-        split.prop(col_layer, "hide_viewport", text="")
-        split.prop(col, "hide_viewport", text="")
-        split.prop(col, "hide_render", text="")
+        hierarchy = [l_c for l_c in get_hierarchy(context.view_layer.layer_collection, col_layer)]
+        tick = ""
+        box = layout.box()
+        for col_layer in reversed(hierarchy):
+            split = box.split(align=True, factor=0.4)
+            split.label(text=tick + col_layer.name)
+            split.prop(col_layer, "exclude", text="")
+            col_name = col_layer.collection.name
+            col = bpy.data.collections.get(col_name)
+            if col is None:
+                continue
+            split.prop(col, "hide_select", text="")
+            split.prop(col_layer, "hide_viewport", text="")
+            split.prop(col, "hide_viewport", text="")
+            split.prop(col, "hide_render", text="")
+            tick += "."
 
 
 def draw_outliner_collection_context(self, context):
