@@ -26,4 +26,12 @@ class GU_OT_modifier_show_input_in_viewport(bpy.types.Operator):
             for inp in props_mod.inputs:
                 inp.show = True
 
+        self.remove_unused(context, props)
+
         return {"FINISHED"}
+
+    def remove_unused(self, context, props):
+        mod_names = [mod.name for mod in context.active_object.modifiers if mod.type == "NODES"]
+        for i in range(len(props) - 1, -1, -1):
+            if props[i].name not in mod_names:
+                props.remove(i)

@@ -44,20 +44,19 @@ class GU_PT_modifier_properties(Panel):
                         continue
                 input_use_attribute_path = input_id + "_use_attribute"
                 # For some reason we can't draw pointer types in the interface.
-                if mod[input_id] is None:
-                    if isinstance(
-                        inp,
-                        (
-                            bpy.types.NodeSocketInterfaceImage,
-                            bpy.types.NodeSocketInterfaceMaterial,
-                            bpy.types.NodeSocketInterfaceCollection,
-                            bpy.types.NodeSocketInterfaceTexture,
-                            bpy.types.NodeSocketInterfaceTexture,
-                            bpy.types.NodeSocketInterfaceObject,
-                            bpy.types.NodeSocketInterfaceImage,
-                        ),
-                    ):
-                        continue
+                if mod[input_id] is None or isinstance(
+                    inp,
+                    (
+                        bpy.types.NodeSocketInterfaceImage,
+                        bpy.types.NodeSocketInterfaceMaterial,
+                        bpy.types.NodeSocketInterfaceCollection,
+                        bpy.types.NodeSocketInterfaceTexture,
+                        bpy.types.NodeSocketInterfaceTexture,
+                        bpy.types.NodeSocketInterfaceObject,
+                        bpy.types.NodeSocketInterfaceImage,
+                    ),
+                ):
+                    continue
                 if input_use_attribute_path in mod and mod[input_use_attribute_path]:
                     row.prop(mod, f'["{input_id}_attribute_name"]', text=inp.name)
                 else:
