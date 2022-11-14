@@ -1,5 +1,4 @@
 import bpy
-from rna_prop_ui import PropertyPanel
 from gorgious_utilities.collection.tool import (
     get_collection_layer_from_collection,
     get_collection_instances,
@@ -74,13 +73,3 @@ class GU_PT_collection_properties_utilities(bpy.types.Panel):
         grid.operator_context = oc
 
         layout.operator("collection.destructively_join_meshes", text="Destructively Join Meshes")
-
-
-class GU_PT_collection_custom_properties(bpy.types.Panel, PropertyPanel):
-    _context_path = "collection"
-    _property_type = bpy.types.Collection
-    bl_label = "Custom Properties"
-    bl_idname = "GU_PT_collection_custom_properties"
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_context = "collection"
