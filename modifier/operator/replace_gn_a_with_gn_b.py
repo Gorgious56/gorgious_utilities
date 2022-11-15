@@ -14,6 +14,8 @@ class GU_OT_modifier_replace_a_with_b(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
+        if not context.active_object:
+            return False
         return len(get_geometry_nodes_groups(None, context)) > 1 and any(
             m for m in context.active_object.modifiers if m.type == "NODES"
         )
