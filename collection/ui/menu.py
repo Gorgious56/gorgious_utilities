@@ -19,21 +19,13 @@ def draw_blueprint_collection_toggle(self, _):
 
 def draw_exclude_collections_from_object(self, context):
     layout = self.layout
-    collection_layers = list(get_collection_layers_from_collections(
-        context.view_layer.layer_collection, context.active_object.users_collection
-    ))
-    split = layout.split(align=True, factor=0.4)
+    collection_layers = list(
+        get_collection_layers_from_collections(
+            context.view_layer.layer_collection, context.active_object.users_collection
+        )
+    )
+    draw_all_collections_toggle(layout, collection_layers, context)
 
-    split.label(text="All Collections")
-    state = not getattr(collection_layers[0], "exclude")
-    op = split.operator("gu.collections_state_toggle", text="", icon="CHECKBOX_HLT" if state else "CHECKBOX_DEHLT")
-    op.attribute = "exclude"
-    op.state = state
-    state = not getattr(collection_layers[0], "hide_viewport")
-    op = split.operator("gu.collections_state_toggle", text="", icon="HIDE_OFF" if state else "HIDE_ON")
-    op.attribute = "hide_viewport"
-    op.state = state
-    
     all_layers = set(collection_layers)
     for col_layer in collection_layers:
         all_layers.update([l_c for l_c in get_hierarchy(context.view_layer.layer_collection, col_layer)])
@@ -56,6 +48,46 @@ def draw_exclude_collections_from_object(self, context):
             split.prop(col, "hide_render", text="")
             tick += "."
 
+
+def draw_all_collections_toggle(layout, col_layers, context):
+    split = layout.split(align=True, factor=0.4)
+
+    split.label(text="All Collections")
+    state = not getattr(col_layers[0], "exclude")
+    op = split.operator("gu.collections_state_toggle", text="", icon="CHECKBOX_HLT" if state else "CHECKBOX_DEHLT")
+    op.attribute = "exclude"
+    op.state = state
+    op.mode = "layer"
+
+    state = not getattr(context.active_object.users_collection[0], "hide_select")
+    op = split.operator(
+        "gu.collections_state_toggle", text="", icon="RESTRICT_SELECT_OFF" if state else "RESTRICT_SELECT_ON"
+    )
+    op.attribute = "hide_select"
+    op.state = state
+    op.mode = "col"
+
+    state = not getattr(col_layers[0], "hide_viewport")
+    op = split.operator("gu.collections_state_toggle", text="", icon="HIDE_OFF" if state else "HIDE_ON")
+    op.attribute = "hide_viewport"
+    op.state = state
+    op.mode = "layer"
+
+    state = not getattr(context.active_object.users_collection[0], "hide_viewport")
+    op = split.operator(
+        "gu.collections_state_toggle", text="", icon="RESTRICT_VIEW_OFF" if state else "RESTRICT_VIEW_ON"
+    )
+    op.attribute = "hide_viewport"
+    op.state = state
+    op.mode = "col"
+
+    state = not getattr(context.active_object.users_collection[0], "hide_render")
+    op = split.operator(
+        "gu.collections_state_toggle", text="", icon="RESTRICT_RENDER_OFF" if state else "RESTRICT_RENDER_ON"
+    )
+    op.attribute = "hide_render"
+    op.state = state
+    op.mode = "col"
 
 def draw_outliner_collection_context(self, context):
     layout = self.layout
