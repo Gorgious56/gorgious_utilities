@@ -10,8 +10,16 @@ class GU_OT_select_used_objects(bpy.types.Operator):
         return context.active_object
 
     def execute(self, context):
-        for obj in context.selected_objects:
+        traversed_objects = set()
+        def select_used_objects(obj):
+            if obj in traversed_objects:
+                return
+            traversed_objects.add(obj)
+            obj.select_set(True)
             for mod in obj.modifiers:
                 if hasattr(mod, "object") and mod.object is not None:
-                    mod.object.select_set(True)
+                    select_used_objects(mod.object)
+
+        for obj in context.selected_objects:
+            select_used_objects(obj)
         return {"FINISHED"}
