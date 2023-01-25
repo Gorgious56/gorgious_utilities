@@ -34,7 +34,7 @@ class GU_PT_modifier_properties(Panel):
                 continue
             col = box.column(align=True)
             for i, inp in enumerate(tree.inputs):
-                if i == 0:
+                if i == 0: # First input is the source geometry. Don't show that
                     continue
                 row = col.row(align=True)
                 input_id = inp.identifier
