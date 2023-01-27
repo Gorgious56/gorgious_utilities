@@ -12,6 +12,7 @@ def draw_modifiers_properties(self, context):
     row = layout.row(align=True)
     sub_row = row.row(align=True)
     sub_row.operator("gu.select_used_objects", icon="LINKED", text="Select Used Objects")
+    sub_row.operator("gu.select_where_i_am_used", icon="LINKED", text="Select Objects Using Me")
     # op = sub_row.operator("object.make_links_data", text="Copy", icon="PASTEDOWN")
     # op.type = "MODIFIERS"
     # sub_row.operator("modifier.drive", icon="DECORATE_DRIVER")
