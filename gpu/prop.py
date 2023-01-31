@@ -5,8 +5,9 @@ from gorgious_utilities.gpu.tool import MeshDrawer
 
 
 def update_draw_mesh_gpu(self, context):
-    if not MeshDrawer.installed:
-        MeshDrawer.install(context)
+    if MeshDrawer.installed:
+        MeshDrawer.uninstall()
+    MeshDrawer.install(context)
 
 
 class GPUProps(PropertyGroup):
