@@ -84,14 +84,15 @@ class MeshDrawer:
         selected_face_centers = []
         unselected_face_centers = []
 
+        unselected_point_size = 4 if obj.type == "MESH" else 1
+
         depsgraph = context.evaluated_depsgraph_get()
         obj = obj.evaluated_get(depsgraph)
 
-        bm = bmesh.from_edit_mesh(obj.data)
         matrix_world = obj.matrix_world
 
         for vertex in bm.verts:
-            co = tuple(matrix_world @ vertex.co)
+            co = matrix_world @ vertex.co
             verts.append(co)
             if vertex.hide:
                 continue
@@ -111,6 +112,26 @@ class MeshDrawer:
                 unselected_edges.append(edge_indices)
 
         select_mode = bm.select_mode
+        if obj.type == "CURVE" and obj.mode == "EDIT":  # Display handles
+            select_mode = "VERT"
+
+            def add_handle(point, handle, selected=True):
+                selection_verts, edges = (
+                    (selected_vertices, selected_edges) if selected else (unselected_vertices, unselected_edges)
+                )
+                verts.append(matrix_world @ handle)
+                verts.append(matrix_world @ point)
+                edges.append([len(verts) - 1, len(verts) - 2])
+                if selected:
+                    selection_verts.append(matrix_world @ handle)
+                    selection_verts.append(matrix_world @ point)
+
+            for spline in obj.data.splines:
+                for point in spline.bezier_points:
+                    if point.hide:
+                        continue
+                    add_handle(point.co, point.handle_right, selected=True)
+                    add_handle(point.co, point.handle_left, selected=True)
 
         def batch_shader(color, size, *args, **kwargs):
             if args[0] == "LINES":
@@ -124,7 +145,7 @@ class MeshDrawer:
         batch_shader(color_unselected, 2, "LINES", {"pos": verts}, indices=unselected_edges)
         batch_shader(color_selected, 3, "LINES", {"pos": verts}, indices=selected_edges)
 
-        batch_shader(black, 4, "POINTS", {"pos": unselected_vertices})
+        batch_shader(black, unselected_point_size, "POINTS", {"pos": unselected_vertices})
         if "VERT" in select_mode:
             batch_shader(color_selected, 8, "POINTS", {"pos": selected_vertices})
 
