@@ -11,7 +11,8 @@ def update_draw_mesh_gpu(self, context):
 
 
 class GPUProps(PropertyGroup):
-    draw_mesh: BoolProperty(default=False, update=update_draw_mesh_gpu, name="Draw XRAY")
+    draw_mesh_edit_mode: BoolProperty(default=False, update=update_draw_mesh_gpu, name="Draw XRAY")
+    draw_mesh_object_mode: BoolProperty(default=False, update=update_draw_mesh_gpu, name="Draw XRAY")
 
 
 GUPropsObject.__annotations__["gpu"] = PointerProperty(type=GPUProps)

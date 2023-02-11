@@ -31,10 +31,32 @@ class MeshDrawer:
         bgl.glEnable(bgl.GL_LINE_SMOOTH)
 
         obj = context.active_object
-        if obj is None or obj.type != "MESH" or not obj.GUProps.gpu.draw_mesh:
+        if obj is None or obj.type not in ("MESH", "CURVE"):
             return
 
-        if obj.mode != "EDIT":
+        depsgraph = context.evaluated_depsgraph_get()
+        obj = obj.evaluated_get(depsgraph)
+        mesh = obj.data
+        if obj.type != "MESH":
+            mesh = obj.to_mesh()
+
+        def bmesh_object_mode():
+            bm = bmesh.new()
+            bm.from_mesh(mesh)
+            return bm
+
+        if obj.mode == "EDIT":
+            if not obj.GUProps.gpu.draw_mesh_edit_mode:
+                return
+            if obj.type == "MESH":
+                bm = bmesh.from_edit_mesh(mesh)
+            else:
+                bm = bmesh_object_mode()
+        elif obj.mode == "OBJECT":
+            if not obj.GUProps.gpu.draw_mesh_object_mode:
+                return
+            bm = bmesh_object_mode()
+        else:
             return
 
         white = (1, 1, 1, 1)
