@@ -30,35 +30,7 @@ class MeshDrawer:
         bgl.glEnable(bgl.GL_BLEND)
         bgl.glEnable(bgl.GL_LINE_SMOOTH)
 
-        obj = context.active_object
-        if obj is None or obj.type not in ("MESH", "CURVE"):
-            return
-
         depsgraph = context.evaluated_depsgraph_get()
-        obj = obj.evaluated_get(depsgraph)
-        mesh = obj.data
-        if obj.type != "MESH":
-            mesh = obj.to_mesh()
-
-        def bmesh_object_mode():
-            bm = bmesh.new()
-            bm.from_mesh(mesh)
-            return bm
-
-        if obj.mode == "EDIT":
-            if not obj.GUProps.gpu.draw_mesh_edit_mode:
-                return
-            if obj.type == "MESH":
-                bm = bmesh.from_edit_mesh(mesh)
-            else:
-                bm = bmesh_object_mode()
-        elif obj.mode == "OBJECT":
-            if not obj.GUProps.gpu.draw_mesh_object_mode:
-                return
-            bm = bmesh_object_mode()
-        else:
-            return
-
         white = (1, 1, 1, 1)
         white_t = (1, 1, 1, 0.1)
         green = (0.545, 0.863, 0, 1)
@@ -84,60 +56,96 @@ class MeshDrawer:
         selected_face_centers = []
         unselected_face_centers = []
 
-        unselected_point_size = 4 if obj.type == "MESH" else 1
+        unselected_point_size = 4
 
-        depsgraph = context.evaluated_depsgraph_get()
-        obj = obj.evaluated_get(depsgraph)
+        select_mode = set()
+        for obj in context.selected_objects:
+            # obj = context.active_object
+            if obj is None or obj.type not in ("MESH", "CURVE"):
+                return
 
-        matrix_world = obj.matrix_world
+            depsgraph = context.evaluated_depsgraph_get()
+            obj = obj.evaluated_get(depsgraph)
+            mesh = obj.data
+            if obj.type != "MESH":
+                mesh = obj.to_mesh()
 
-        for vertex in bm.verts:
-            co = matrix_world @ vertex.co
-            verts.append(co)
-            if vertex.hide:
-                continue
+            def bmesh_object_mode():
+                bm = bmesh.new()
+                bm.from_mesh(mesh)
+                return bm
 
-            if vertex.select:
-                selected_vertices.append(co)
+            if obj.mode == "EDIT":
+                if not obj.GUProps.gpu.draw_mesh_edit_mode:
+                    return
+                if obj.type == "MESH":
+                    bm = bmesh.from_edit_mesh(mesh)
+                else:
+                    bm = bmesh_object_mode()
+            elif obj.mode == "OBJECT":
+                if not obj.GUProps.gpu.draw_mesh_object_mode:
+                    return
+                bm = bmesh_object_mode()
             else:
-                unselected_vertices.append(co)
+                return
 
-        for edge in bm.edges:
-            edge_indices = [v.index for v in edge.verts]
-            if edge.hide:
-                continue
-            if edge.select:
-                selected_edges.append(edge_indices)
-            else:
-                unselected_edges.append(edge_indices)
+            obj = obj.evaluated_get(depsgraph)
 
-        select_mode = bm.select_mode
-        if obj.type == "CURVE" and obj.mode == "EDIT":  # Display handles
-            select_mode = "VERT"
+            matrix_world = obj.matrix_world
 
-            def add_handle(point, handle, selected=True):
-                selection_verts, edges = (
-                    (selected_vertices, selected_edges) if selected else (unselected_vertices, unselected_edges)
-                )
-                verts.append(matrix_world @ handle)
-                verts.append(matrix_world @ point)
-                edges.append([len(verts) - 1, len(verts) - 2])
-                if selected:
-                    selection_verts.append(matrix_world @ handle)
-                    selection_verts.append(matrix_world @ point)
+            for vertex in bm.verts:
+                co = matrix_world @ vertex.co
+                verts.append(co)
+                if vertex.hide:
+                    continue
 
-            for spline in obj.data.splines:
-                for point in spline.bezier_points:
-                    if point.hide:
-                        continue
-                    add_handle(point.co, point.handle_right, selected=True)
-                    add_handle(point.co, point.handle_left, selected=True)
+                if vertex.select:
+                    selected_vertices.append(co)
+                else:
+                    unselected_vertices.append(co)
+
+            for edge in bm.edges:
+                edge_indices = [v.index for v in edge.verts]
+                if edge.hide:
+                    continue
+                if edge.select:
+                    selected_edges.append(edge_indices)
+                else:
+                    unselected_edges.append(edge_indices)
+
+            select_mode = bm.select_mode
+            if obj.type == "CURVE" and obj.mode == "EDIT":  # Display handles
+                select_mode = "VERT"
+
+                def add_handle(point, handle, selected=True):
+                    selection_verts, edges = (
+                        (selected_vertices, selected_edges) if selected else (unselected_vertices, unselected_edges)
+                    )
+                    verts.append(matrix_world @ handle)
+                    verts.append(matrix_world @ point)
+                    edges.append([len(verts) - 1, len(verts) - 2])
+                    if selected:
+                        selection_verts.append(matrix_world @ handle)
+                        selection_verts.append(matrix_world @ point)
+
+                for spline in obj.data.splines:
+                    for point in spline.bezier_points:
+                        if point.hide:
+                            continue
+                        add_handle(point.co, point.handle_right, selected=True)
+                        add_handle(point.co, point.handle_left, selected=True)
+                    for point in spline.points:
+                        # For some reason there is a 4th component to point coordinates
+                        if point.select:
+                            selected_vertices.append(matrix_world @ point.co.xyz)
+                        else:
+                            unselected_vertices.append(matrix_world @ point.co.xyz)
 
         def batch_shader(color, size, *args, **kwargs):
             if args[0] == "LINES":
-                bgl.glLineWidth(size)
+                bgl.glLineWidth(int(size))
             elif args[0] == "POINTS":
-                bgl.glPointSize(size)
+                bgl.glPointSize(int(size))
             batch = batch_for_shader(self.shader, *args, **kwargs)
             self.shader.uniform_float("color", color)
             batch.draw(self.shader)
