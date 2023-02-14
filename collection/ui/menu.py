@@ -48,6 +48,14 @@ def draw_exclude_collections_from_object(self, context):
             split.prop(col, "hide_render", text="")
             tick += "."
 
+            add_to_collection = split.operator("gu.collection_move_selected_to_this", text="", icon="ADD")
+            add_to_collection.collection = col_layer.collection.name
+            add_to_collection.unlink_others = False
+            row = split.row(align=True)
+            remove_from_collection = row.operator("gu.collection_remove_selected_from_this", text="", icon="REMOVE")
+            remove_from_collection.collection = col_layer.collection.name
+            row.enabled = context.active_object.name in col_layer.collection.objects
+
 
 def draw_all_collections_toggle(layout, col_layers, context):
     split = layout.split(align=True, factor=0.4)
@@ -93,10 +101,11 @@ def draw_outliner_collection_context(self, context):
     layout = self.layout
     layout.separator()
     layout.operator("collection.rename_objects", text="Rename Objects")
-    op = layout.operator("collection.move_selected_to_this", text="Move Selected Objects to Collection")
+    op = layout.operator("gu.collection_move_selected_to_this", text="Move Selected Objects to Collection")
     op.unlink_others = True
-    op = layout.operator("collection.move_selected_to_this", text="Add Selected Objects to Collection")
+    op = layout.operator("gu.collection_move_selected_to_this", text="Add Selected Objects to Collection")
     op.unlink_others = False
+    op = layout.operator("gu.collection_remove_selected_from_this", text="Remove Selected Objects from Collection")
 
     col = next(_id for _id in context.selected_ids if isinstance(_id, bpy.types.Collection))
     layer_col = get_collection_layer_from_collection(context.view_layer.layer_collection, col)
