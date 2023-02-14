@@ -26,11 +26,7 @@ def draw_exclude_collections_from_object(self, context):
     )
     draw_all_collections_toggle(layout, collection_layers, context)
 
-    all_layers = set(collection_layers)
-    for col_layer in collection_layers:
-        all_layers.update([l_c for l_c in get_hierarchy(context.view_layer.layer_collection, col_layer)])
-
-    for col_layer in collection_layers:
+    for col_layer in set(collection_layers):
         hierarchy = [l_c for l_c in get_hierarchy(context.view_layer.layer_collection, col_layer)]
         tick = ""
         box = layout.box()
