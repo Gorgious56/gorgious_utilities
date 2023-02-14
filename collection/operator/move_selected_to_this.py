@@ -2,15 +2,14 @@ import bpy
 
 
 class GU_OT_collection_move_selected_to_this(bpy.types.Operator):
-    """Toggle Visibility of Boolean Collections"""
-
-    bl_idname = "collection.move_selected_to_this"
+    bl_idname = "gu.collection_move_selected_to_this"
     bl_label = "Move selected objects to this collection"
     bl_options = {"UNDO"}
     unlink_others: bpy.props.BoolProperty(default=True)
+    collection: bpy.props.StringProperty(default="")
 
     def execute(self, context):
-        target_col = context.collection
+        target_col = context.collection if self.collection == "" else bpy.data.collections[self.collection]
         objs = set()
         objs.add(context.active_object)
         objs.update(context.selected_objects)
@@ -24,5 +23,7 @@ class GU_OT_collection_move_selected_to_this(bpy.types.Operator):
                         col.objects.unlink(obj)
             if not already_linked:
                 target_col.objects.link(obj)
+
+        self.collection = ""
 
         return {"FINISHED"}
