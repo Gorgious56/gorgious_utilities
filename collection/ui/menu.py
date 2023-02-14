@@ -34,8 +34,9 @@ def draw_exclude_collections_from_object(self, context):
         hierarchy = [l_c for l_c in get_hierarchy(context.view_layer.layer_collection, col_layer)]
         tick = ""
         box = layout.box()
+        column = box.column(align=True)
         for col_layer in reversed(hierarchy):
-            split = box.split(align=True, factor=0.4)
+            split = column.split(align=True, factor=0.4)
             split.label(text=tick + col_layer.name)
             split.prop(col_layer, "exclude", text="")
             col_name = col_layer.collection.name
