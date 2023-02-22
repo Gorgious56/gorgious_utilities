@@ -26,13 +26,31 @@ def draw_exclude_collections_from_object(self, context):
     )
     draw_all_collections_toggle(layout, collection_layers, context)
 
-    for col_layer in set(collection_layers):
-        hierarchy = [l_c for l_c in get_hierarchy(context.view_layer.layer_collection, col_layer)]
+    collection_layers = set(collection_layers)
+    hierarchies = {}
+
+    for col_layer in collection_layers:
+        hierarchies[col_layer] = [l_c for l_c in get_hierarchy(context.view_layer.layer_collection, col_layer)]
+    
+    for col_layer in collection_layers:
+        for col_layer_test, hierarchy in hierarchies.copy().items():
+            if col_layer_test == col_layer:
+                continue
+            if col_layer in hierarchy:
+                try:
+                    del hierarchies[col_layer]
+                except KeyError:
+                    pass
+
+    for col_layer in collection_layers:
+        if col_layer not in hierarchies.keys():
+            continue
+        hierarchy = hierarchies[col_layer]
         tick = ""
         box = layout.box()
         column = box.column(align=True)
         for col_layer in reversed(hierarchy):
-            split = column.split(align=True, factor=0.4)
+            split = column.split(align=True, factor=0.5)
             split.label(text=tick + col_layer.name)
             split.prop(col_layer, "exclude", text="")
             col_name = col_layer.collection.name
@@ -43,15 +61,19 @@ def draw_exclude_collections_from_object(self, context):
             split.prop(col_layer, "hide_viewport", text="")
             split.prop(col, "hide_viewport", text="")
             split.prop(col, "hide_render", text="")
-            tick += "."
+            tick += " "
 
             add_to_collection = split.operator("gu.collection_move_selected_to_this", text="", icon="ADD")
             add_to_collection.collection = col_layer.collection.name
             add_to_collection.unlink_others = False
+
             row = split.row(align=True)
             remove_from_collection = row.operator("gu.collection_remove_selected_from_this", text="", icon="REMOVE")
             remove_from_collection.collection = col_layer.collection.name
             row.enabled = context.active_object.name in col_layer.collection.objects
+
+            select_objects = split.operator("gu.collection_select_all_objects", text="", icon="OBJECT_DATA")
+            select_objects.collection = col_layer.collection.name
 
 
 def draw_all_collections_toggle(layout, col_layers, context):
