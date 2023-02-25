@@ -1,6 +1,4 @@
 import bpy
-import bmesh
-from gorgious_utilities.attribute.util import get_bmesh_domain
 
 
 class GU_OT_attribute_copy(bpy.types.Operator):

@@ -1,6 +1,5 @@
 import bpy
 import bmesh
-
 from gorgious_utilities.attribute.util import get_bmesh_domain
 
 

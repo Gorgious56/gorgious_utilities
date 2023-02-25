@@ -11,18 +11,23 @@ class GU_PT_attribute_properties(Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object and context.active_object.data and context.active_object.data.attributes
+        return (
+            context.active_object
+            and context.active_object.data
+            and any(a for a in context.active_object.data.attributes if not a.name.startswith("."))
+        )
 
     def draw(self, context):
-        self.layout.template_list(
-            "MESH_UL_attributes",
-            "attributes",
-            context.active_object.data,
-            "attributes",
-            context.active_object.data.attributes,
-            "active_index",
-            rows=3,
-        )
+        if context.active_object.data.attributes:
+            self.layout.template_list(
+                "MESH_UL_attributes",
+                "attributes",
+                context.active_object.data,
+                "attributes",
+                context.active_object.data.attributes,
+                "active_index",
+                rows=3,
+            )
         if context.active_object.data.attributes.active:
             draw_attribute_set(self, context)
 
