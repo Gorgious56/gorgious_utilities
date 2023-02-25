@@ -11,7 +11,9 @@ class GU_PT_modifier_properties(Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.active_object
+        return context.active_object and any(
+            m for m in context.active_object.modifiers if isinstance(m, NodesModifier)
+        )
 
     def draw(self, context):
         props = context.active_object.GUProps.modifier.modifier_inputs
@@ -34,7 +36,7 @@ class GU_PT_modifier_properties(Panel):
                 continue
             col = box.column(align=True)
             for i, inp in enumerate(tree.inputs):
-                if i == 0: # First input is the source geometry. Don't show that
+                if i == 0:  # First input is the source geometry. Don't show that
                     continue
                 row = col.row(align=True)
                 input_id = inp.identifier
