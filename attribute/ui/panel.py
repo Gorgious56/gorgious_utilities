@@ -1,4 +1,20 @@
 import bpy
+from bpy.types import Panel
+
+
+class GU_PT_attribute_properties(Panel):
+    bl_label = "Attribute"
+    bl_idname = "GU_PT_modifier_properties"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "Item"
+
+    @classmethod
+    def poll(cls, context):
+        return context.active_object and context.active_object.data.attributes.active
+
+    def draw(self, context):
+        draw_attribute_set(self, context)
 
 
 def draw_attribute_set(self, context):
@@ -15,8 +31,15 @@ def draw_attribute_set(self, context):
 
     row = layout.row(align=True)
     row.prop(props, attribute.data_type, text=attribute.data_type.title())
-    attribute_set = row.operator("gu.attribute_set", icon="CHECKMARK", text="")
-    attribute_set.mode = mesh_select_mode
+    op = row.operator("gu.attribute_set", icon="CHECKMARK", text="")
+    op.mode = mesh_select_mode
+    op.attribute_name = attribute.name
+    op = row.operator("gu.attribute_copy", icon="COPYDOWN", text="")
+    op.mode = mesh_select_mode
+    op.attribute_name = attribute.name
+    op = row.operator("gu.attribute_sample", icon="EYEDROPPER", text="")
+    op.mode = mesh_select_mode
+    op.attribute_name = attribute.name
 
 
 def register():

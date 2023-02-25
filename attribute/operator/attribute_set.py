@@ -1,6 +1,7 @@
 import bpy
 import bmesh
-import numpy as np
+
+from gorgious_utilities.attribute.util import get_bmesh_domain
 
 
 class GU_OT_attribute_set(bpy.types.Operator):
@@ -8,28 +9,29 @@ class GU_OT_attribute_set(bpy.types.Operator):
     bl_label = "Set attribute"
     bl_options = {"UNDO", "REGISTER"}
     mode: bpy.props.BoolVectorProperty()
+    attribute_name: bpy.props.StringProperty()
 
     def execute(self, context):
         active_object = context.active_object
-        attribute_name = active_object.data.attributes.active.name
+        attribute_name = (
+            active_object.data.attributes.active.name if self.attribute_name is None else self.attribute_name
+        )
         was_in_object_mode = active_object.mode == "OBJECT"
         if not was_in_object_mode:
             bpy.ops.object.editmode_toggle()
 
-        bm = bmesh.new()
-        bm.from_mesh(active_object.data)
+        if active_object.mode == "OBJECT":
+            bm = bmesh.new()
+            bm.from_mesh(active_object.data)
+        else:
+            bm = bmesh.from_edit_mesh(active_object.data)
+
         attribute = active_object.data.attributes[attribute_name]
 
         props = active_object.GUProps.attribute
         new_value = getattr(props, attribute.data_type)
 
-        if self.mode[0] and attribute.domain == "POINT":
-            domain = bm.verts
-        elif self.mode[1] and attribute.domain == "EDGE":
-            domain = bm.edges
-        elif self.mode[2] and attribute.domain == "FACE":
-            domain = bm.faces
-
+        domain = get_bmesh_domain(bm, attribute.domain)
         first_attribute = attribute.data[0]
         for attr_name in ("value", "vector", "color"):
             if hasattr(first_attribute, attr_name):
@@ -38,7 +40,7 @@ class GU_OT_attribute_set(bpy.types.Operator):
             return {"FINISHED"}
 
         existing_value = getattr(first_attribute, attr_name)
-        if existing_value is str:
+        if isinstance(existing_value, str):
             size = 1
         else:
             try:
