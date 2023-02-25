@@ -11,8 +11,15 @@ from bpy.types import PropertyGroup
 from gorgious_utilities.core.prop import GUPropsObject
 
 
+def update_attribute_ui(self, context):
+    bpy.ops.gu.attribute_set(
+        mode=context.scene.tool_settings.mesh_select_mode,
+        attribute_name=context.active_object.data.attributes.active.name,
+    )
+
+
 class AttributeProps(PropertyGroup):
-    FLOAT: FloatProperty()
+    FLOAT: FloatProperty(update=update_attribute_ui)
     INT: IntProperty()
     FLOAT2: FloatVectorProperty(size=2)
     STRING: StringProperty()
