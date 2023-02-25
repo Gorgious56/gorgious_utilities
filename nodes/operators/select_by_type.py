@@ -5,7 +5,7 @@ from gorgious_utilities.nodes.helper import get_active_node_tree, get_node_types
 
 
 class GU_OT_nodes_select_by_type(bpy.types.Operator, NodeTreeOperator):
-    bl_idname = "nodes.select_by_type"
+    bl_idname = "gu.nodes_select_by_type"
     bl_label = "Select By Type"
 
     node_type: EnumProperty(name="Type", items=get_node_types)
