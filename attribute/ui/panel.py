@@ -4,17 +4,27 @@ from bpy.types import Panel
 
 class GU_PT_attribute_properties(Panel):
     bl_label = "Attribute"
-    bl_idname = "GU_PT_modifier_properties"
+    bl_idname = "GU_PT_attribute_properties"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "Item"
 
     @classmethod
     def poll(cls, context):
-        return context.active_object and context.active_object.data.attributes.active
+        return context.active_object and context.active_object.data and context.active_object.data.attributes
 
     def draw(self, context):
-        draw_attribute_set(self, context)
+        self.layout.template_list(
+            "MESH_UL_attributes",
+            "attributes",
+            context.active_object.data,
+            "attributes",
+            context.active_object.data.attributes,
+            "active_index",
+            rows=3,
+        )
+        if context.active_object.data.attributes.active:
+            draw_attribute_set(self, context)
 
 
 def draw_attribute_set(self, context):
