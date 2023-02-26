@@ -15,6 +15,7 @@ class GU_PT_attribute_properties(Panel):
         return (
             context.active_object
             and context.active_object.data
+            and hasattr(context.active_object.data, "attributes")
             and any(a for a in context.active_object.data.attributes if not a.name.startswith("."))
         )
 

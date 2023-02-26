@@ -260,6 +260,4 @@ class MeshDrawer:
             indices=indices,
         )
         # https://docs.blender.org/api/current/gpu.state.html#gpu.state.face_culling_set
-        # gpu.state.depth_test_set("LESS_EQUAL")
-        gpu.state.face_culling_set("BACK")
         batch.draw(shader)
