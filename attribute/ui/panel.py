@@ -1,5 +1,6 @@
 import bpy
 from bpy.types import Panel
+from gorgious_utilities.attribute.operator.attribute_viewer import node_group_name
 
 
 class GU_PT_attribute_properties(Panel):
@@ -55,6 +56,17 @@ def draw_attribute_set(self, context):
     op = row.operator("gu.attribute_sample", icon="EYEDROPPER", text="")
     op.mode = mesh_select_mode
     op.attribute_name = attribute.name
+
+    row = layout.row(align=True)
+    if any(m for m in active_object.modifiers if m.name == node_group_name and m.type == "NODES"):
+        icon = "HIDE_ON"
+    else:
+        icon = "HIDE_OFF"
+    op = row.operator("gu.attribute_viewer", icon=icon, text="")
+    op.attribute_name = attribute.name
+    op = row.operator("gu.attribute_viewer", icon="VIEWZOOM", text="")
+    op.attribute_name = attribute.name
+    op.update = True
 
 
 def register():
