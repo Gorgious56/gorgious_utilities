@@ -1,12 +1,14 @@
 # Code inspired by the BlenderBIM addon (C) Dion Moult 2020, 2021, modified by Nathan HILD 2023
 # https://github.com/IfcOpenShell/IfcOpenShell/blob/v0.7.0/src/blenderbim/blenderbim/bim/module/model/opening.py
 
+import numpy as np
 import bpy
 import gpu
 import bgl
 import bmesh
 from gpu_extras.batch import batch_for_shader
 from gorgious_utilities.core.preferences.tool import get_preferences
+from gorgious_utilities.attribute.tool import get_attribute_size_and_name_from_attribute
 
 
 class MeshDrawer:
@@ -27,11 +29,39 @@ class MeshDrawer:
             pass
         cls.installed = None
 
+    def __call__(self, context):
+        self.init_global(context)
+        for obj in context.selected_objects:
+            self.init_for_obj(obj)
+            if not self.is_obj_valid(obj):
+                continue
+            self.calc_obj_and_mesh_eval(obj)
+            self.draw_attribute()
+            self.create_bmesh()
+            if self.bm is not None:
+                self.process_geometry()
+                self.draw_geometry(context.preferences.themes[0])
+        self.shader.bind()
+
+    def process_geometry(self):
+        self.process_verts()
+        self.process_edges()
+        self.process_faces()
+
+    def draw_geometry(self, theme):
+        self.draw_faces(
+            color_selected_dot=theme.view_3d.face_dot[:] + (1,),
+            color_selected_face=theme.view_3d.face_select[:],
+        )
+        self.draw_edges(color_selected=theme.view_3d.edge_select[:] + (1,))
+        self.draw_curve_handles()
+        self.draw_verts(color_selected=theme.view_3d.vertex_select[:] + (1,))
+
     def batch_shader(self, color, size, *args, **kwargs):
         if args[0] == "LINES":
-            bgl.glLineWidth(int(size))
+            gpu.state.line_width_set(size)
         elif args[0] == "POINTS":
-            bgl.glPointSize(int(size))
+            gpu.state.point_size_set(size)
         batch = batch_for_shader(self.shader, *args, **kwargs)
         self.shader.uniform_float("color", color)
         batch.draw(self.shader)
@@ -89,7 +119,7 @@ class MeshDrawer:
         if self.bm is not None:
             self.select_mode = self.bm.select_mode
 
-    def process_verts(self, color_selected):
+    def process_verts(self):
         for vertex in self.bm.verts:
             co = self.matrix_world @ vertex.co
             self.verts.append(co)
@@ -99,6 +129,8 @@ class MeshDrawer:
                 self.unselected_vertices.append(co)
             else:
                 self.selected_vertices.append(co)
+
+    def draw_verts(self, color_selected):
         self.batch_shader(
             self.gpu_preferences.color_unselected,
             self.unselected_point_size,
@@ -108,7 +140,7 @@ class MeshDrawer:
         if "VERT" in self.select_mode:
             self.batch_shader(color_selected, 8, "POINTS", {"pos": self.selected_vertices})
 
-    def process_edges(self, color_selected):
+    def process_edges(self):
         for edge in self.bm.edges:
             edge_indices = [v.index for v in edge.verts]
             if edge.hide:
@@ -117,58 +149,39 @@ class MeshDrawer:
                 self.unselected_edges.append(edge_indices)
             else:
                 self.selected_edges.append(edge_indices)
+
+    def draw_edges(self, color_selected):
         self.batch_shader(
             self.gpu_preferences.color_unselected, 2, "LINES", {"pos": self.verts}, indices=self.unselected_edges
         )
         self.batch_shader(color_selected, 3, "LINES", {"pos": self.verts}, indices=self.selected_edges)
 
-    def process_faces(self, color_selected_dot, color_selected_face):
+    def process_faces(self):
+        self.selected_faces = []
         if "FACE" not in self.select_mode:
             return
-        selected_faces = []
         for face in self.bm.faces:
             if face.hide:
                 continue
             if self.obj_eval.mode == "OBJECT" or not face.select:
                 self.unselected_face_centers.append(self.matrix_world @ face.calc_center_median())
             else:
-                selected_faces.append(face.index)
+                self.selected_faces.append(face.index)
                 self.selected_face_centers.append(self.matrix_world @ face.calc_center_median())
 
-        if selected_faces:
-            bm_tri = self.bm.copy()
-            bm_tri.faces.ensure_lookup_table()
-            bmesh.ops.triangulate(bm_tri, faces=[bm_tri.faces[i] for i in selected_faces])
-            for face in bm_tri.faces:
-                if len(face.verts) != 3:
-                    continue
-                self.batch_shader(
-                    color_selected_face, -1, "TRIS", {"pos": [self.matrix_world @ v.co for v in face.verts]}
-                )
+    def draw_faces(self, color_selected_dot, color_selected_face):
+        if not self.selected_faces:
+            return
+        bm_tri = self.bm.copy()
+        bm_tri.faces.ensure_lookup_table()
+        bmesh.ops.triangulate(bm_tri, faces=[bm_tri.faces[i] for i in self.selected_faces])
+        for face in bm_tri.faces:
+            if len(face.verts) != 3:
+                continue
+            self.batch_shader(color_selected_face, -1, "TRIS", {"pos": [self.matrix_world @ v.co for v in face.verts]})
 
         self.batch_shader(self.gpu_preferences.color_unselected, 5, "POINTS", {"pos": self.unselected_face_centers})
         self.batch_shader(color_selected_dot, 8, "POINTS", {"pos": self.selected_face_centers})
-
-    def __call__(self, context):
-        self.init_global(context)
-        for obj in context.selected_objects:
-            self.init_for_obj(obj)
-            if not self.is_obj_valid(obj):
-                continue
-            self.calc_obj_and_mesh_eval(obj)
-            self.create_bmesh()
-            if self.bm is None:
-                continue
-
-            self.process_verts(color_selected=context.preferences.themes[0].view_3d.vertex_select[:] + (1,))
-            self.process_edges(color_selected=context.preferences.themes[0].view_3d.edge_select[:] + (1,))
-            self.process_faces(
-                color_selected_dot=context.preferences.themes[0].view_3d.face_dot[:] + (1,),
-                color_selected_face=context.preferences.themes[0].view_3d.face_select[:],
-            )
-            self.process_curve_handles()
-
-        self.shader.bind()
 
     def add_handle(self, point, handle, selected=True):
         selection_verts, edges = (
@@ -186,7 +199,7 @@ class MeshDrawer:
             selection_verts.append(self.matrix_world @ handle)
             selection_verts.append(self.matrix_world @ point)
 
-    def process_curve_handles(self):
+    def draw_curve_handles(self):
         if self.obj_eval.type != "CURVE" or self.obj_eval.mode != "EDIT":
             return
         self.select_mode = ("VERT",)
@@ -202,3 +215,51 @@ class MeshDrawer:
                     self.unselected_vertices.append(self.matrix_world @ point.co.xyz)
                 else:
                     self.selected_vertices.append(self.matrix_world @ point.co.xyz)
+
+    def draw_attribute(self):
+        attribute = self.mesh_eval.attributes.active
+        if attribute is None:
+            return
+        if self.obj_eval.mode != "OBJECT":
+            return
+        if not self.obj_eval.GUProps.gpu.draw_mesh_attribute:
+            return
+
+        mesh = bpy.context.active_object.data
+        mesh.calc_loop_triangles()
+
+        vertices = np.empty((len(mesh.vertices), 3), "f")
+        indices = np.empty((len(mesh.loop_triangles), 3), "i")
+
+        mesh.vertices.foreach_get("co", np.reshape(vertices, len(mesh.vertices) * 3))
+        mesh.loop_triangles.foreach_get("vertices", np.reshape(indices, len(mesh.loop_triangles) * 3))
+
+        size, attr_name = get_attribute_size_and_name_from_attribute(attribute)
+        vertex_colors = []
+        if size == 1:
+            for i in range(len(mesh.vertices)):
+                value = getattr(attribute.data[i], attr_name)
+                vertex_colors.append((value, value, value, 1))
+        elif size == 2:
+            for i in range(len(mesh.vertices)):
+                value = getattr(attribute.data[i], attr_name)
+                vertex_colors.append((value[0], value[1], 0, 1))
+        elif size == 3:
+            for i in range(len(mesh.vertices)):
+                value = getattr(attribute.data[i], attr_name)
+                vertex_colors.append((value[0], value[1], value[2], 1))
+        elif size == 4:
+            for i in range(len(mesh.vertices)):
+                vertex_colors.append(getattr(attribute.data[i], attr_name))
+
+        shader = gpu.shader.from_builtin("3D_SMOOTH_COLOR")
+        batch = batch_for_shader(
+            shader,
+            "TRIS",
+            {"pos": vertices, "color": vertex_colors},
+            indices=indices,
+        )
+        # https://docs.blender.org/api/current/gpu.state.html#gpu.state.face_culling_set
+        # gpu.state.depth_test_set("LESS_EQUAL")
+        gpu.state.face_culling_set("BACK")
+        batch.draw(shader)

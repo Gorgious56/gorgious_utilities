@@ -1,6 +1,9 @@
 import bpy
 import bmesh
-from gorgious_utilities.attribute.util import get_bmesh_domain
+from gorgious_utilities.attribute.tool import (
+    get_bmesh_domain,
+    get_attribute_size_and_name_from_attribute,
+)
 
 
 class GU_OT_attribute_set(bpy.types.Operator):
@@ -31,21 +34,8 @@ class GU_OT_attribute_set(bpy.types.Operator):
         new_value = getattr(props, attribute.data_type)
 
         domain = get_bmesh_domain(bm, attribute.domain)
-        first_attribute = attribute.data[0]
-        for attr_name in ("value", "vector", "color"):
-            if hasattr(first_attribute, attr_name):
-                break
-        else:
-            return {"FINISHED"}
 
-        existing_value = getattr(first_attribute, attr_name)
-        if isinstance(existing_value, str):
-            size = 1
-        else:
-            try:
-                size = len(existing_value)
-            except TypeError:
-                size = 1
+        size, attr_name = get_attribute_size_and_name_from_attribute(attribute)
 
         values = [None] * len(domain) * size
         attribute.data.foreach_get(attr_name, values)

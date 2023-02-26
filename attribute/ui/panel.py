@@ -59,14 +59,20 @@ def draw_attribute_set(self, context):
 
     row = layout.row(align=True)
     if any(m for m in active_object.modifiers if m.name == node_group_name and m.type == "NODES"):
-        icon = "HIDE_ON"
+        icon = "MODIFIER_OFF"
     else:
-        icon = "HIDE_OFF"
+        icon = "MODIFIER_ON"
     op = row.operator("gu.attribute_viewer", icon=icon, text="")
     op.attribute_name = attribute.name
     op = row.operator("gu.attribute_viewer", icon="VIEWZOOM", text="")
     op.attribute_name = attribute.name
     op.update = True
+    row.prop(
+        active_object.GUProps.gpu,
+        "draw_mesh_attribute",
+        text="",
+        icon="HIDE_OFF" if active_object.GUProps.gpu.draw_mesh_attribute else "HIDE_ON",
+    )
 
 
 def register():
