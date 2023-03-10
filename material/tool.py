@@ -38,3 +38,16 @@ def get_main_color(material: bpy.types.Material) -> None:
                 metallic=0,
                 roughness=0.4,
             )
+
+
+def create_new_material(name, **kwargs):
+    new_mat = bpy.data.materials.new(name=name)
+    for k, v in kwargs.items():
+        setattr(new_mat, k, v)
+    return new_mat
+
+
+def set_material_slot_to_material(obj, mat, index=0):
+    while len(obj.data.materials) <= index:
+        obj.data.materials.append(None)
+    obj.material_slots[index].material = mat

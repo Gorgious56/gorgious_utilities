@@ -1,5 +1,5 @@
 import bpy
-from gorgious_utilities.material.helper import update_viewport_color
+from gorgious_utilities.material.tool import update_viewport_color
 
 
 class GU_OT_set_viewport_color_to_main_color(bpy.types.Operator):
