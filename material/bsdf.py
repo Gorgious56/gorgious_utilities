@@ -26,11 +26,10 @@ class BSDFMaterial:
 
     def bake_all_maps(self, source, obj_target, obj_source, img_size):
         texture_nodes = 0
-        for i, source_input in enumerate(source.bsdf_node.inputs):
+        for source_input in source.bsdf_node.inputs:
             if not source_input.links:
-                continue
-            if source_input.name == "Normal":
-                if not source_input.links[0].from_socket.node.inputs["Color"].links:
+                if source_input.name != "Normal":
+                    self.bsdf_node.inputs[source_input.name].default_value = source_input.default_value
                     continue
             texture_nodes += 1
             node_texture = self.node_tree.nodes.new(type="ShaderNodeTexImage")
@@ -44,8 +43,11 @@ class BSDFMaterial:
                 node_normal_map.location = node_texture.location
                 self.node_tree.links.new(node_texture.outputs[0], node_normal_map.inputs[1])
                 self.node_tree.links.new(node_normal_map.outputs[0], self.bsdf_node.inputs["Normal"])
-                source_input = source_input.links[0].from_socket.node.inputs["Color"]
-                if not source_input.links:
+                if source_input.links:
+                    source_input = source_input.links[0].from_socket.node.inputs["Color"]
+                else:
+                    self.select_node(node_texture)
+                    bake(obj_source, obj_target, type="NORMAL")
                     continue
             else:
                 self.node_tree.links.new(node_texture.outputs[0], self.bsdf_node.inputs[source_input.name])
@@ -54,4 +56,5 @@ class BSDFMaterial:
             self.select_node(node_texture)
             bake(obj_source, obj_target)
         source.links.new(source.socket_bsdf_output, source.socket_input_output)
-        bpy.ops.image.save_all_modified()
+        if texture_nodes > 0:
+            bpy.ops.image.save_all_modified()
