@@ -24,23 +24,44 @@ class BSDFMaterial:
     def socket_input_output(self):
         return self.node_tree.nodes["Material Output"].inputs[0]
 
-    def bake_all_maps(self, source, obj_target, obj_source, img_size):
-        texture_nodes = 0
+    def get_texture_maps(self):
+        texture_maps = {}
+        for input in self.bsdf_node.inputs:
+            if not input.links:
+                continue
+            texture_node = input.links[0].from_socket.node
+            if input.name == "Normal":
+                texture_maps["Normal Map"] = texture_node
+                texture_node = texture_node.inputs["Color"].links[0].from_socket.node
+            texture_maps[input.name] = texture_node
+        return texture_maps
+
+    def bake_all_maps(self, source, obj_target, obj_source, props):
+        texture_nodes = []
+        texture_maps = self.get_texture_maps()
         for source_input in source.bsdf_node.inputs:
             if not source_input.links:
                 if source_input.name != "Normal":
                     self.bsdf_node.inputs[source_input.name].default_value = source_input.default_value
                     continue
-            texture_nodes += 1
-            node_texture = self.node_tree.nodes.new(type="ShaderNodeTexImage")
+            texture_settings, _ = props.get_texture_setting_and_index_for_map(source_input.name)
+            if not texture_settings.bake_me:
+                continue
+            node_texture = texture_maps.get(source_input.name)
+            if node_texture is None:
+                node_texture = self.node_tree.nodes.new(type="ShaderNodeTexImage")
+            texture_nodes.append(node_texture)
+            img_size = props.get_pixel_size_for_map(source_input.name)
             new_img = create_image(name=self.name + "_" + source_input.name, width=img_size, height=img_size)
             node_texture.image = new_img
-            node_texture.location = (-300, 600 - (texture_nodes * 300))
+            node_texture.location = (-300, 600 - (len(texture_nodes) * 300))
             if source_input.type != "RGBA":
                 new_img.colorspace_settings.name = "Non-Color"
             if source_input.name == "Normal":
-                node_normal_map = self.node_tree.nodes.new(type="ShaderNodeNormalMap")
-                node_normal_map.location = node_texture.location
+                node_normal_map = texture_maps.get("Normal Map")
+                if node_normal_map is None:
+                    node_normal_map = self.node_tree.nodes.new(type="ShaderNodeNormalMap")
+                    node_normal_map.location = node_texture.location
                 self.node_tree.links.new(node_texture.outputs[0], node_normal_map.inputs[1])
                 self.node_tree.links.new(node_normal_map.outputs[0], self.bsdf_node.inputs["Normal"])
                 if source_input.links:
@@ -56,5 +77,6 @@ class BSDFMaterial:
             self.select_node(node_texture)
             bake(obj_source, obj_target)
         source.links.new(source.socket_bsdf_output, source.socket_input_output)
-        if texture_nodes > 0:
+        if texture_nodes:
+            self.select_node(texture_nodes[0])  # Select the base color texture so it displays in solid mode
             bpy.ops.image.save_all_modified()

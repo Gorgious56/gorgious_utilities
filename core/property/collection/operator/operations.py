@@ -8,11 +8,16 @@ class GU_OT_collection_property_operations(Operator):
     collection_property_name: StringProperty()
     operation: StringProperty()
     index: IntProperty(default=-1)
+    item_name: StringProperty()
 
     def execute(self, context):
         collection_property = getattr(context.collection_property_holder, self.collection_property_name)
         if self.operation == "ADD":
-            collection_property.add()
+            new = collection_property.add()
+            if self.item_name:
+                new.name = self.item_name
+            if hasattr(new, "on_add"):
+                new.on_add()
         else:
             collection_property.remove(self.index)
         return {"FINISHED"}

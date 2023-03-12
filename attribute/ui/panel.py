@@ -45,7 +45,8 @@ def draw_attribute_set(self, context):
     # https://blender.stackexchange.com/a/40319/86891
     mesh_select_mode = context.scene.tool_settings.mesh_select_mode  # (Bool(Vertex), Bool(Edge), Bool(Face))
     props = active_object.GUProps.attribute
-
+    if attribute.data_type == "BYTE_COLOR":
+        return
     row = layout.row(align=True)
     row.prop(props, attribute.data_type, text=attribute.data_type.title())
     op = row.operator("gu.attribute_set", icon="CHECKMARK", text="")

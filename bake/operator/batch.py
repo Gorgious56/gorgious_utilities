@@ -2,6 +2,7 @@ from bpy.types import Operator
 from gorgious_utilities.material.tool import set_material_slot_to_material
 from gorgious_utilities.material.bsdf import BSDFMaterial
 import gorgious_utilities.bake.tool
+from gorgious_utilities.uv.tool import smart_uv_project
 
 
 class GU_OT_bake_batch(Operator):
@@ -28,33 +29,43 @@ class GU_OT_bake_batch(Operator):
 
     def execute(self, context):
         props = context.active_object.GUProps.lod
-        props.is_running = False
         obj_hp = context.active_object
         render_settings_origin = gorgious_utilities.bake.tool.store_settings(context.scene.render.bake)
-        gorgious_utilities.bake.tool.update_settings(
-            context.scene.render.bake,
-            use_selected_to_active=True,
-            cage_extrusion=0.04,
-        )
 
         for lod in props.target_lods:
             obj_lp = lod.object
             if obj_lp is None:
                 continue
-            if lod.baked:
+            obj_lp_props = obj_lp.GUProps.lod
+            if obj_lp_props.baked:
                 continue
-            obj_lp_origin = obj_lp.location
-            if lod.reset_origin_on_bake:
-                obj_lp_origin.location = (0, 0, 0)
-            bsdf_mat_lp = BSDFMaterial(name=obj_lp.name)
+            if not obj_lp.data.uv_layers:
+                smart_uv_project(
+                    obj_lp,
+                    angle_limit=0.959931,
+                    island_margin=0.001,
+                )
+            gorgious_utilities.bake.tool.update_settings(
+                context.scene.render.bake,
+                use_selected_to_active=True,
+                cage_extrusion=obj_lp_props.bake_settings.cage_extrusion,
+            )
+
+            obj_lp_origin = obj_lp.location.copy()
+            if obj_lp_props.reset_origin_on_bake and obj_lp_origin != (0, 0, 0):
+                obj_lp.location = (0, 0, 0)
+
+            bsdf_mat_lp = BSDFMaterial(
+                name=obj_lp.name, material=obj_lp.data.materials[0] if obj_lp.data.materials else None
+            )
             set_material_slot_to_material(obj_lp, bsdf_mat_lp.material)
 
             bsdf_mat_hp = BSDFMaterial(name="HP BSDF Material", material=obj_hp.data.materials[0])
 
-            bsdf_mat_lp.bake_all_maps(bsdf_mat_hp, obj_lp, obj_hp, props.pixel_size)
-            lod.baked = True
-            if lod.reset_origin_on_bake:
-                obj_lp_origin.location = obj_lp_origin
+            bsdf_mat_lp.bake_all_maps(bsdf_mat_hp, obj_lp, obj_hp, props)
+            obj_lp_props.baked = True
+            if obj_lp_props.reset_origin_on_bake and obj_lp_origin != (0, 0, 0):
+                obj_lp.location = obj_lp_origin
 
         context.view_layer.objects.active = lod.id_data
         lod.id_data.select_set(True)

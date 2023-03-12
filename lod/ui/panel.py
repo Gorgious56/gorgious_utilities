@@ -1,10 +1,10 @@
 import bpy
 from bpy.types import Panel
-import gorgious_utilities.core.ui.collection_property
+import gorgious_utilities.core.property.collection.ui.draw_generic
 
 
 class GU_PT_scene_lod(Panel):
-    bl_label = "LOD baking"
+    bl_label = "LOD Baking"
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "object"
@@ -16,12 +16,19 @@ class GU_PT_scene_lod(Panel):
 
         box = layout.box()
         box.label(text="LODs")
-        gorgious_utilities.core.ui.collection_property.draw(box, props.target_lods)
-
-        row = layout.row(align=True)
+        row = box.row(align=True)
         row.operator("gu.lod_remesh", text="Create LODs", icon="MOD_REMESH")
         row.operator("gu.bake_batch", text="Bake LODs", icon="TEXTURE")
+        gorgious_utilities.core.property.collection.ui.draw_generic.draw(box, props.target_lods)
 
-        row = layout.row(align=True)
-        row.prop(props, "image_size")
-        row.label(text=f"{props.pixel_size}*{props.pixel_size} pixels")
+        props.draw(layout)
+
+
+class GU_PT_object_lod_settings(Panel):
+    bl_label = "LOD override settings"
+    bl_options = {"INSTANCED"}
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "WINDOW"
+
+    def draw(self, context):
+        context.lod.object.GUProps.lod.draw_lod_settings(self.layout)
