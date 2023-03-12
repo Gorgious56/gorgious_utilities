@@ -72,6 +72,7 @@ class RemesherSettings(PropertyGroup):
 class TextureSetting(PropertyGroup):
     name: StringProperty()
     image_size: FloatProperty(default=1, min=0.01, soft_min=1, soft_max=8, step=100, precision=1)
+    use_alpha: BoolProperty(default=False)
     bake_me: BoolProperty(default=True)
     active: BoolProperty(default=True)
 
@@ -83,6 +84,7 @@ class TextureSetting(PropertyGroup):
         if self.bake_me:
             layout.prop(self, "image_size", text=display_name(self, "image_size"))
         layout.prop(self, "bake_me", text="", icon="TEXTURE")
+        layout.prop(self, "use_alpha", text="", icon="IMAGE_RGB_ALPHA")
         layout.prop(self, "active", icon="UNLINKED", text="")
 
 
@@ -102,6 +104,12 @@ class LodProps(PropertyGroup):
     @property
     def pixel_size(self):
         return int(self.image_size_default * 1024)
+
+    def get_use_alpha(self, map_name):
+        texture_setting, _ = self.get_texture_setting_and_index_for_map(map_name)
+        if texture_setting and texture_setting.active:
+            return texture_setting.use_alpha
+        return False
 
     def get_pixel_size_for_map(self, map_name):
         texture_setting, _ = self.get_texture_setting_and_index_for_map(map_name)

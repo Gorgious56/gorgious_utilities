@@ -52,7 +52,10 @@ class BSDFMaterial:
                 node_texture = self.node_tree.nodes.new(type="ShaderNodeTexImage")
             texture_nodes.append(node_texture)
             img_size = props.get_pixel_size_for_map(source_input.name)
-            new_img = create_image(name=self.name + "_" + source_input.name, width=img_size, height=img_size)
+            use_alpha = props.get_use_alpha(source_input.name)
+            new_img = create_image(
+                name=self.name + "_" + source_input.name, width=img_size, height=img_size, alpha=use_alpha
+            )
             node_texture.image = new_img
             node_texture.location = (-300, 600 - (len(texture_nodes) * 300))
             if source_input.type != "RGBA":
