@@ -44,17 +44,29 @@ class BSDFMaterial:
                 if source_input.name != "Normal":
                     self.bsdf_node.inputs[source_input.name].default_value = source_input.default_value
                     continue
-            texture_settings, _ = props.get_texture_setting_and_index_for_map(source_input.name)
-            if not texture_settings.bake_me:
+            texture_settings = obj_target.GUProps.lod.bake_settings.texture_settings
+            for texture_setting in texture_settings:
+                if texture_setting.name == source_input.name:
+                    break
+            else:
+                texture_setting = None
+            if texture_setting and not texture_setting.bake_me:
                 continue
             node_texture = texture_maps.get(source_input.name)
             if node_texture is None:
                 node_texture = self.node_tree.nodes.new(type="ShaderNodeTexImage")
             texture_nodes.append(node_texture)
-            img_size = props.get_pixel_size_for_map(source_input.name)
-            use_alpha = props.get_use_alpha(source_input.name)
+            if texture_setting and texture_setting.active:
+                img_size = texture_setting.pixel_size
+                use_alpha = texture_setting.use_alpha
+            else:
+                img_size = props.pixel_size
+                use_alpha = False
             new_img = create_image(
-                name=self.name + "_" + source_input.name, width=img_size, height=img_size, alpha=use_alpha
+                name=self.name + "_" + source_input.name,
+                width=img_size,
+                height=img_size,
+                alpha=use_alpha,
             )
             node_texture.image = new_img
             node_texture.location = (-300, 600 - (len(texture_nodes) * 300))
@@ -75,6 +87,8 @@ class BSDFMaterial:
                     continue
             else:
                 self.node_tree.links.new(node_texture.outputs[0], self.bsdf_node.inputs[source_input.name])
+                if source_input.name == "Base Color" and use_alpha:
+                    self.node_tree.links.new(node_texture.outputs[1], self.bsdf_node.inputs["Alpha"])
 
             source.links.new(source_input.links[0].from_socket, source.socket_input_output)
             self.select_node(node_texture)

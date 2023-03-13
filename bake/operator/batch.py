@@ -55,9 +55,11 @@ class GU_OT_bake_batch(Operator):
             if obj_lp_props.reset_origin_on_bake and obj_lp_origin != (0, 0, 0):
                 obj_lp.location = (0, 0, 0)
 
-            bsdf_mat_lp = BSDFMaterial(
-                name=obj_lp.name, material=obj_lp.data.materials[0] if obj_lp.data.materials else None
-            )
+            material = None
+            if obj_lp.data.materials:
+                if obj_lp.data.materials[0] != obj_hp.data.materials[0]:
+                    material = obj_lp.data.materials[0]
+            bsdf_mat_lp = BSDFMaterial(name=obj_lp.name, material=material)
             set_material_slot_to_material(obj_lp, bsdf_mat_lp.material)
 
             bsdf_mat_hp = BSDFMaterial(name="HP BSDF Material", material=obj_hp.data.materials[0])
