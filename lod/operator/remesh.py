@@ -38,7 +38,6 @@ class GU_OT_lod_remesh(Operator):
                 setattr(self, ann, origin_value)
         qremesher_props.hide_input = False
 
-        props = context.active_object.GUProps.lod
         self.is_running = False
         self.source_object_name = context.active_object.name
         context.window_manager.modal_handler_add(self)
@@ -79,6 +78,7 @@ class GU_OT_lod_remesh(Operator):
                 obj_lp.name = f"{source_object.name}_LOD{current_lod.number}"
             obj_lp.data.name = obj_lp.name
             self.is_running = False
+            obj_lp.GUProps.lod.source_high_poly_props.object = source_object
             return {"RUNNING_MODAL"}
         else:
             with context.temp_override(active_object=source_object, selected_objects=[source_object]):

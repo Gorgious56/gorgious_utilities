@@ -47,7 +47,7 @@ class BakeSettings(PropertyGroup):
 
     def draw_texture_settings(self, layout):
         obj = self.id_data.GUProps.lod.source_high_poly_props.object
-        if not obj.data or not obj.data.materials:
+        if not obj or not obj.data or not obj.data.materials:
             return
         box = layout.box()
         row = box.row(align=True)
@@ -213,6 +213,7 @@ class LodProps(PropertyGroup):
         self.source_high_poly_props.draw(box)
         box.prop(self, "baked", text=display_name(self, "baked"), icon="TEXTURE")
         box.prop(self, "reset_origin_on_bake", text=display_name(self, "reset_origin_on_bake"), icon="OBJECT_ORIGIN")
+        # TODO add button to bake only me
         self.bake_settings.draw(box)
 
     def draw_texture_settings(self, layout):
