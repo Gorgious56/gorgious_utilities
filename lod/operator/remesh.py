@@ -78,6 +78,7 @@ class GU_OT_lod_remesh(Operator):
                 obj_lp.name = f"{source_object.name}_LOD{current_lod.number}"
             obj_lp.data.name = obj_lp.name
             self.is_running = False
+            obj_lp.GUProps.lod.target_lods.clear()
             obj_lp.GUProps.lod.source_high_poly_props.object = source_object
             return {"RUNNING_MODAL"}
         else:
