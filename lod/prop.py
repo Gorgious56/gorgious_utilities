@@ -3,6 +3,7 @@ from bpy.props import CollectionProperty, PointerProperty, StringProperty, BoolP
 from bpy.types import PropertyGroup, Object
 from gorgious_utilities.core.prop import GUPropsObject
 
+import gorgious_utilities.core.property.collection.ui.draw_generic
 from gorgious_utilities.core.property.tool import display_name
 
 
@@ -108,8 +109,8 @@ class LODPropertyGroup(PropertyGroup):
         split.prop(self, "number", text="")
         if self.object:
             split.prop(self, "object")
-            op = layout.operator("GU_OT_command", icon="RESTRICT_SELECT_OFF", text="")
-            op.command = f'context.view_layer.objects.active.select_set(False); context.view_layer.objects.active = context.scene.objects["{self.object.name}"]; context.view_layer.objects.active.select_set(True);'
+            op = layout.operator("gu.select_and_set_active", icon="RESTRICT_SELECT_OFF", text="")
+            op.object_name = self.object.name
 
             layout.prop(self.object.GUProps.lod, "baked", icon="TEXTURE", text="")
             layout.context_pointer_set("lod", self)
@@ -180,7 +181,14 @@ class HighPolyProps(PropertyGroup):
     object_cache: PointerProperty(type=Object)
 
     def draw(self, layout):
-        layout.prop(self, "object")
+        row = layout.row(align=True)
+        row.prop(self, "object")
+        op = row.operator("gu.select_and_set_active", text="", icon="RESTRICT_SELECT_OFF")
+        op.object_name = self.object.name
+
+    def clear(self):
+        self.object = None
+        self.object_cache = None
 
 
 class LodProps(PropertyGroup):
@@ -202,6 +210,14 @@ class LodProps(PropertyGroup):
 
     def draw(self, layout):
         if self.target_lods:
+
+            box = layout.box()
+            box.label(text="LODs")
+            row = box.row(align=True)
+            row.operator("gu.lod_remesh", text="Create LODs", icon="MOD_REMESH")
+            row.operator("gu.bake_batch", text="Bake LODs", icon="TEXTURE")
+            row.operator("gu.bake_sanitize", text="", icon="GREASEPENCIL")
+            gorgious_utilities.core.property.collection.ui.draw_generic.draw(box, self.target_lods)
             self.draw_texture_settings(layout)
             self.remesher_settings.draw(layout)
         else:
@@ -211,13 +227,18 @@ class LodProps(PropertyGroup):
         box = layout.box()
         box.label(text="LOD Settings")
         self.source_high_poly_props.draw(box)
-        box.prop(self, "baked", text=display_name(self, "baked"), icon="TEXTURE")
+        row = box.row(align=True)
+        row.prop(self, "baked", text="Baked ?", icon="TEXTURE")
+        row.operator("gu.bake_batch", icon="SCENE", text="Bake Me !")
         box.prop(self, "reset_origin_on_bake", text=display_name(self, "reset_origin_on_bake"), icon="OBJECT_ORIGIN")
-        # TODO add button to bake only me
         self.bake_settings.draw(box)
 
     def draw_texture_settings(self, layout):
         layout.prop(self, "image_size_default", text=display_name(self, "image_size_default"))
+
+    def clear(self):
+        self.target_lods.clear()
+        self.source_high_poly_props.clear()
 
 
 GUPropsObject.__annotations__["lod"] = PointerProperty(type=LodProps)

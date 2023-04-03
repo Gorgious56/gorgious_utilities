@@ -16,6 +16,8 @@ class GU_OT_bake_batch(Operator):
             return False
         props = context.active_object.GUProps.lod
         if not props.target_lods:
+            if props.source_high_poly_props.object and not props.baked:
+                return True
             return False
         if not any(lod.object for lod in props.target_lods):
             return False
@@ -29,10 +31,20 @@ class GU_OT_bake_batch(Operator):
 
     def execute(self, context):
         props = context.active_object.GUProps.lod
-        obj_hp = context.active_object
+        if props.target_lods:
+            obj_hp = context.active_object
+            target_lods = props.target_lods
+        else:
+            obj_hp = props.source_high_poly_props.object
+            target_lod = next(
+                target_lod
+                for target_lod in obj_hp.GUProps.lod.target_lods
+                if target_lod.object == context.active_object
+            )
+            target_lods = [target_lod]
         render_settings_origin = gorgious_utilities.bake.tool.store_settings(context.scene.render.bake)
 
-        for lod in props.target_lods:
+        for lod in target_lods:
             obj_lp = lod.object
             if obj_lp is None:
                 continue
