@@ -1,9 +1,10 @@
+import bpy
 from bpy.types import Operator
 from gorgious_utilities.material.bsdf import BSDFMaterial
 
 
-class GU_OT_bake_sanitize_image_names(Operator):
-    bl_idname = "gu.bake_sanitize_image_names"
+class GU_OT_bake_sanitize(Operator):
+    bl_idname = "gu.bake_sanitize"
     bl_label = ""
 
     def execute(self, context):
@@ -14,6 +15,7 @@ class GU_OT_bake_sanitize_image_names(Operator):
                 continue
             mat = obj.data.materials[0]
             mat.name = obj.name
+            obj.data.name = obj.name
             mats.append(mat)
         for mat in mats:
             bsdf_mat = BSDFMaterial(mat.name, mat)
@@ -23,4 +25,9 @@ class GU_OT_bake_sanitize_image_names(Operator):
                 if not hasattr(texture_node, "image"):
                     continue
                 texture_node.image.name = mat.name + "_" + input_name
+
+        for obj in bpy.data.objects:
+            if obj.name in context.scene.objects:
+                continue
+            bpy.data.objects.remove(obj)
         return {"FINISHED"}
