@@ -16,8 +16,9 @@ class GU_OT_bake_batch(Operator):
             return False
         props = context.active_object.GUProps.lod
         if not props.target_lods:
-            if props.source_high_poly_props.object and not props.baked:
-                return True
+            lod = props.get_lod_settings()
+            if lod:
+                return not lod.bake_settings.baked
             return False
         if not any(lod.object for lod in props.target_lods):
             return False
@@ -49,7 +50,7 @@ class GU_OT_bake_batch(Operator):
             if obj_lp is None:
                 continue
             obj_lp_props = obj_lp.GUProps.lod
-            if obj_lp_props.baked:
+            if obj_lp_props.get_lod_settings().bake_settings.baked:
                 continue
             if not obj_lp.data.uv_layers:
                 smart_uv_project(
@@ -60,11 +61,11 @@ class GU_OT_bake_batch(Operator):
             gorgious_utilities.bake.tool.update_settings(
                 context.scene.render.bake,
                 use_selected_to_active=True,
-                cage_extrusion=obj_lp_props.bake_settings.cage_extrusion,
+                cage_extrusion=obj_lp_props.get_lod_settings().bake_settings.cage_extrusion,
             )
 
             obj_lp_origin = obj_lp.location.copy()
-            if obj_lp_props.reset_origin_on_bake and obj_lp_origin != (0, 0, 0):
+            if obj_lp_props.get_lod_settings().bake_settings.reset_origin_on_bake and obj_lp_origin != (0, 0, 0):
                 obj_lp.location = (0, 0, 0)
 
             material = None
@@ -77,8 +78,8 @@ class GU_OT_bake_batch(Operator):
             bsdf_mat_hp = BSDFMaterial(name="HP BSDF Material", material=obj_hp.data.materials[0])
 
             bsdf_mat_lp.bake_all_maps(bsdf_mat_hp, obj_lp, obj_hp, props)
-            obj_lp_props.baked = True
-            if obj_lp_props.reset_origin_on_bake and obj_lp_origin != (0, 0, 0):
+            obj_lp_props.get_lod_settings().bake_settings.baked = True
+            if obj_lp_props.get_lod_settings().bake_settings.reset_origin_on_bake and obj_lp_origin != (0, 0, 0):
                 obj_lp.location = obj_lp_origin
 
         context.view_layer.objects.active = lod.id_data

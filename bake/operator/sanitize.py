@@ -9,12 +9,14 @@ class GU_OT_bake_sanitize(Operator):
 
     def execute(self, context):
         mats = [context.active_object.data.materials[0]]
+        context.active_object.data.name = context.active_object.name
         for lod in context.active_object.GUProps.lod.target_lods:
             obj = lod.object
             if not obj or not obj.data or not obj.data.materials:
                 continue
             mat = obj.data.materials[0]
             mat.name = obj.name
+            obj.name = context.active_object.name.split("_LOD")[0] + "_LOD" + str(lod.number)
             obj.data.name = obj.name
             mats.append(mat)
         for mat in mats:

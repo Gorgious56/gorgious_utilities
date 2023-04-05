@@ -44,7 +44,7 @@ class BSDFMaterial:
                 if source_input.name != "Normal":
                     self.bsdf_node.inputs[source_input.name].default_value = source_input.default_value
                     continue
-            texture_settings = obj_target.GUProps.lod.bake_settings.texture_settings
+            texture_settings = obj_target.GUProps.lod.get_lod_settings().bake_settings.texture_settings
             for texture_setting in texture_settings:
                 if texture_setting.name == source_input.name:
                     break

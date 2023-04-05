@@ -97,8 +97,6 @@ class GU_OT_lod_remesh(Operator):
                 self.is_running = False
                 bpy.context.view_layer.objects.active = source_object
                 source_object.select_set(True)
-                if props.bake_after_remesh:
-                    print("bake !")
                 for ann in self.__annotations__:
                     if ann.startswith("qremesh_origin_"):
                         origin_value = getattr(self, ann)
