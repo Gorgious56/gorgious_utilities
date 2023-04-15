@@ -18,6 +18,6 @@ class GU_OT_collection_property_operations(Operator):
                 new.name = self.item_name
             if hasattr(new, "on_add"):
                 new.on_add()
-        else:
+        elif self.operation == "REMOVE":
             collection_property.remove(self.index)
         return {"FINISHED"}

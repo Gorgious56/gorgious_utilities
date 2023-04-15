@@ -6,7 +6,6 @@ from gorgious_utilities.core.prop import GUPropsObject
 import gorgious_utilities.core.property.collection.ui.draw_generic
 from gorgious_utilities.core.property.tool import display_name
 
-from gorgious_utilities.lod.prop.texture import TextureSetting
 from gorgious_utilities.lod.prop.bake import BakeSettings
 from gorgious_utilities.lod.prop.remesh import RemesherSettings
 
@@ -90,6 +89,8 @@ class HighPolyProps(PropertyGroup):
     object_cache: PointerProperty(type=Object)
 
     def draw(self, layout):
+        if not self.object:
+            return
         row = layout.row(align=True)
         row.prop(self, "object")
         op = row.operator("gu.select_and_set_active", text="", icon="RESTRICT_SELECT_OFF")
@@ -111,8 +112,7 @@ class LodProps(PropertyGroup):
         return int(self.image_size_default * 1024)
 
     def draw(self, layout):
-        if self.target_lods:
-
+        if self.target_lods or not self.source_high_poly_props.object:
             box = layout.box()
             box.label(text="LODs")
             row = box.row(align=True)
@@ -131,7 +131,8 @@ class LodProps(PropertyGroup):
         self.source_high_poly_props.draw(box)
         row = box.row(align=True)
         row.operator("gu.bake_batch", icon="SCENE", text="Bake Me !")
-        self.get_lod_settings().bake_settings.draw(box)
+        if lod_settings := self.get_lod_settings():
+            lod_settings.bake_settings.draw(box)
 
     def draw_texture_settings(self, layout):
         layout.prop(self, "image_size_default", text=display_name(self, "image_size_default"))
