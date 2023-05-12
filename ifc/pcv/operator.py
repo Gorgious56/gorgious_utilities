@@ -3,15 +3,12 @@ from mathutils import Matrix
 import json
 
 try:
-    from blenderbim.bim.module.pset.data import ObjectPsetsData
-    import blenderbim.bim.helper
     from ifcopenshell.api import run
     from blenderbim.bim.ifc import IfcStore
     import blenderbim.tool as tool
 except:
     pass
 finally:
-
     pcv_mapping_dict = {
         "File Path": ("point_cloud_visualizer.load", "filepath"),
         "Shader": ("point_cloud_visualizer.shader", "type"),
@@ -37,61 +34,56 @@ finally:
             obj = context.active_object
             if obj is None:
                 return
-
-            if not ObjectPsetsData.is_loaded:
-                ObjectPsetsData.load()
-            for pset in ObjectPsetsData.data["psets"]:
-                if "PointCloudVisualizer" in pset["Name"]:
-                    return True
+            element = tool.Ifc.get_entity(obj)
+            if not element:
+                return
+            return bool(tool.Pset.get_element_pset(element, "PointCloudVisualizerProps"))
 
         def execute(self, context):
             obj = context.active_object
-
-            if not ObjectPsetsData.is_loaded:
-                ObjectPsetsData.load()
-
-            for pset in ObjectPsetsData.data["psets"]:
-                if "PointCloudVisualizer" in pset["Name"]:
-                    for prop in pset["Properties"]:
-                        value = prop["NominalValue"]
-                        if prop["Name"] == "Clip Object Name":
-                            if not value:
-                                continue
-                            obj_clip = bpy.data.objects.get(value)
-                            if not obj_clip:
-                                bpy.ops.mesh.primitive_cube_add(
-                                    size=2, enter_editmode=False, align="WORLD", location=(0, 0, 0), scale=(1, 1, 1)
-                                )
-                                context.active_object.name = value
-                                obj_clip = context.active_object
-                                obj_clip.display_type = "BOUNDS"
-                                obj_clip.select_set(False)
-                                context.view_layer.objects.active = obj
-                                obj.select_set(True)
-                            obj.point_cloud_visualizer.shader.clip_planes_from_bbox_object = obj_clip
-                            clip_obj_matrix_prop = next(
-                                (p for p in pset["Properties"] if p["Name"] == "Clip Object Matrix"), None
+            element = tool.Ifc.get_entity(obj)
+            pset = tool.Pset.get_element_pset(element, "PointCloudVisualizerProps")
+            print(pset)
+            for prop in pset.HasProperties:
+                value = prop.NominalValue.wrappedValue
+                if prop.Name == "Clip Object Name":
+                    if not value:
+                        continue
+                    obj_clip = bpy.data.objects.get(value)
+                    if not obj_clip:
+                        bpy.ops.mesh.primitive_cube_add(
+                            size=2, enter_editmode=False, align="WORLD", location=(0, 0, 0), scale=(1, 1, 1)
+                        )
+                        context.active_object.name = value
+                        obj_clip = context.active_object
+                        obj_clip.display_type = "BOUNDS"
+                        obj_clip.select_set(False)
+                        context.view_layer.objects.active = obj
+                        obj.select_set(True)
+                    obj.point_cloud_visualizer.shader.clip_planes_from_bbox_object = obj_clip
+                    clip_obj_matrix_prop = next(
+                        (p for p in pset.HasProperties if p.Name == "Clip Object Matrix"), None
+                    )
+                    if clip_obj_matrix_prop:
+                        matrix_1d = json.loads(clip_obj_matrix_prop.NominalValue.wrappedValue)
+                        matrix = [
+                            (
+                                matrix_1d[4 * i],
+                                matrix_1d[4 * i + 1],
+                                matrix_1d[4 * i + 2],
+                                matrix_1d[4 * i + 3],
                             )
-                            if clip_obj_matrix_prop:
-                                matrix_1d = json.loads(clip_obj_matrix_prop["NominalValue"])
-                                matrix = [
-                                    (
-                                        matrix_1d[4 * i],
-                                        matrix_1d[4 * i + 1],
-                                        matrix_1d[4 * i + 2],
-                                        matrix_1d[4 * i + 3],
-                                    )
-                                    for i in range(4)
-                                ]
-                                obj_clip.matrix_world = Matrix(matrix)
+                            for i in range(4)
+                        ]
+                        obj_clip.matrix_world = Matrix(matrix)
 
-                        elif prop["Name"] == "Scalar Range Min":
-                            obj.point_cloud_visualizer.display.range[0] = value
-                        elif prop["Name"] == "Scalar Range Max":
-                            obj.point_cloud_visualizer.display.range[1] = value
-                        elif prop["Name"] in pcv_mapping_dict:
-                            prop_path, attr = pcv_mapping_dict[prop["Name"]]
-                            setattr(obj.path_resolve(prop_path), attr, value)
+                elif prop.Name == "Scalar Range Min":
+                    obj.point_cloud_visualizer.display.range[0] = value
+                elif prop.Name == "Scalar Range Max":
+                    obj.point_cloud_visualizer.display.range[1] = value
+                elif prop.Name in pcv_mapping_dict:
+                    prop_path, attr = pcv_mapping_dict[prop.Name]
+                    setattr(obj.path_resolve(prop_path), attr, value)
 
             return {"FINISHED"}
 
@@ -101,15 +93,11 @@ finally:
         bl_options = {"REGISTER", "UNDO"}
 
         def execute(self, context):
-
             obj = context.active_object
-
             ifc = tool.Ifc.get()
-            ifc_definition_id = blenderbim.bim.helper.get_obj_ifc_definition_id(context, obj.name, "Object")
-            element = ifc.by_id(ifc_definition_id)
-            propertyset_name = "PointCloudVisualizerProps"
+            element = tool.Ifc.get_entity(obj)
 
-            pset = run("pset.add_pset", ifc, product=element, name=propertyset_name)
+            pset = run("pset.add_pset", ifc, product=element, name="PointCloudVisualizerProps")
 
             properties = {k: getattr(obj.path_resolve(v[0]), v[1]) for k, v in pcv_mapping_dict.items()}
             clip_object = obj.point_cloud_visualizer.shader.clip_planes_from_bbox_object
@@ -127,7 +115,6 @@ finally:
             run("pset.edit_pset", ifc, pset=pset, properties=properties)
             ifc.write(IfcStore.path)
 
-            bpy.ops.bim.enable_pset_editing(pset_id=pset.id(), obj=obj.name, obj_type="Object")
-            bpy.ops.bim.disable_pset_editing(obj=obj.name, obj_type="Object")
+            context.view_layer.objects.active = context.active_object
 
             return {"FINISHED"}
