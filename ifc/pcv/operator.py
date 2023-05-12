@@ -43,7 +43,6 @@ finally:
             obj = context.active_object
             element = tool.Ifc.get_entity(obj)
             pset = tool.Pset.get_element_pset(element, "PointCloudVisualizerProps")
-            print(pset)
             for prop in pset.HasProperties:
                 value = prop.NominalValue.wrappedValue
                 if prop.Name == "Clip Object Name":
@@ -54,8 +53,8 @@ finally:
                         bpy.ops.mesh.primitive_cube_add(
                             size=2, enter_editmode=False, align="WORLD", location=(0, 0, 0), scale=(1, 1, 1)
                         )
-                        context.active_object.name = value
-                        obj_clip = context.active_object
+                        obj_clip = context.view_layer.objects.active
+                        obj_clip.name = value
                         obj_clip.display_type = "BOUNDS"
                         obj_clip.select_set(False)
                         context.view_layer.objects.active = obj
