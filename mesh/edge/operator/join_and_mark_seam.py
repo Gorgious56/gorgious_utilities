@@ -8,6 +8,9 @@ class GU_OT_mesh_edge_join_and_mark_sharp(Macro):
 
 
 def register():
-    bpy.utils.register_class(GU_OT_mesh_edge_join_and_mark_sharp)
+    try:
+        bpy.utils.register_class(GU_OT_mesh_edge_join_and_mark_sharp)
+    except ValueError:
+        pass
     GU_OT_mesh_edge_join_and_mark_sharp.define("mesh.vert_connect_path")
     GU_OT_mesh_edge_join_and_mark_sharp.define("mesh.mark_sharp")
