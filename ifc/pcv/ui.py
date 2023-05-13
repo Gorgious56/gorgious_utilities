@@ -47,14 +47,25 @@ finally:
             box.label(text=element.Name)
             row = box.row(align=True)
             op = row.operator("gu.select_and_set_active", text="", icon="RESTRICT_SELECT_OFF")
+            row.prop(obj, "hide_viewport", text="", icon="HIDE_OFF")
             op.object_name = obj.name
             GU_PT_IFC_PCV.draw_store_update(row, obj)
             row.context_pointer_set("object", obj)
             row.context_pointer_set("active_object", obj)  # Not necessary but keep it if pcv author changes their mind
             row.operator("point_cloud_visualizer.mechanist_draw")
+            for prop in pset.HasProperties:
+                if prop.Name == "Clip Object Name":
+                    value = prop.NominalValue.wrappedValue
+                    if value:
+                        op = row.operator("gu.select_and_set_active", text="", icon="SNAP_PEEL_OBJECT")
+                        op.object_name = value
+                    break
 
     def register():
         bpy.types.PCV_PT_view3d_menu.append(pcv_topbar_menu)
 
     def unregister():
-        bpy.types.PCV_PT_view3d_menu.remove(pcv_topbar_menu)
+        try:
+            bpy.types.PCV_PT_view3d_menu.remove(pcv_topbar_menu)
+        except AttributeError:
+            pass
