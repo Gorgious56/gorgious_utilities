@@ -69,12 +69,12 @@ def draw_attribute_set(self, context):
     op = row.operator("gu.attribute_viewer", icon="VIEWZOOM", text="")
     op.attribute_name = attribute.name
     op.update = True
-    row.prop(
-        active_object.GUProps.gpu,
-        "draw_mesh_attribute",
-        text="",
-        icon="HIDE_OFF" if active_object.GUProps.gpu.draw_mesh_attribute else "HIDE_ON",
-    )
+    # row.prop(
+    #     active_object.GUProps.gpu,
+    #     "draw_mesh_attribute",
+    #     text="",
+    #     icon="HIDE_OFF" if active_object.GUProps.gpu.draw_mesh_attribute else "HIDE_ON",
+    # )
 
 
 def register():

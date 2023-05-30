@@ -30,13 +30,17 @@ class MeshDrawer:
         cls.installed = None
 
     def __call__(self, context):
+        if not context.scene.GUProps.gpu.draw_mesh:
+            return
         self.init_global(context)
+        self.bm = None
         for obj in context.selected_objects:
+            self.obj = obj
             self.init_for_obj(obj)
             if not self.is_obj_valid(obj):
-                continue
+                continue        
             self.calc_obj_and_mesh_eval(obj)
-            self.draw_attribute()
+            # self.draw_attribute()
             self.create_bmesh()
             if self.bm is not None:
                 self.process_geometry()
@@ -89,7 +93,7 @@ class MeshDrawer:
         self.matrix_world = obj.matrix_world
 
     def is_obj_valid(self, obj):
-        return obj is not None and obj.type in ("MESH", "CURVE")
+        return hasattr(obj, "type") and obj.type in ("MESH", "CURVE")
 
     def calc_obj_and_mesh_eval(self, obj):
         self.obj_eval = obj.evaluated_get(self.depsgraph)
@@ -99,22 +103,15 @@ class MeshDrawer:
 
     def create_bmesh(self):
         if self.obj_eval.mode == "EDIT":
-            if not self.obj_eval.GUProps.gpu.draw_mesh_edit_mode:
-                self.bm = None
-                return
             if self.obj_eval.type == "MESH":
                 self.bm = bmesh.from_edit_mesh(self.mesh_eval)
             else:
                 self.bm = bmesh.new()
                 self.bm.from_mesh(self.mesh_eval)
         elif self.obj_eval.mode == "OBJECT":
-            if not self.obj_eval.GUProps.gpu.draw_mesh_object_mode:
-                self.bm = None
-                return
             self.bm = bmesh.new()
             self.bm.from_mesh(self.mesh_eval)
         else:
-            self.bm = None
             return
         if self.bm is not None:
             self.select_mode = self.bm.select_mode

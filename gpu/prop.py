@@ -1,6 +1,6 @@
 from bpy.props import FloatVectorProperty, PointerProperty, BoolProperty, StringProperty, FloatProperty
 from bpy.types import PropertyGroup
-from gorgious_utilities.core.prop import GUPropsObject
+from gorgious_utilities.core.prop import GUPropsScene
 from gorgious_utilities.gpu.tool import MeshDrawer
 
 
@@ -29,9 +29,8 @@ class GPUPreferences(PropertyGroup):
 
 
 class GPUProps(PropertyGroup):
-    draw_mesh_edit_mode: BoolProperty(default=False, update=update_draw_mesh_gpu, name="Draw XRAY")
-    draw_mesh_object_mode: BoolProperty(default=False, update=update_draw_mesh_gpu, name="Draw XRAY")
+    draw_mesh: BoolProperty(default=False, update=update_draw_mesh_gpu, name="Draw XRAY")
     draw_mesh_attribute: BoolProperty(default=False, update=update_draw_mesh_gpu)
 
 
-GUPropsObject.__annotations__["gpu"] = PointerProperty(type=GPUProps)
+GUPropsScene.__annotations__["gpu"] = PointerProperty(type=GPUProps)
