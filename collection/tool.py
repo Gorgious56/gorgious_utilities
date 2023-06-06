@@ -9,6 +9,13 @@ def get_parent(col: bpy.types.Collection) -> bpy.types.Collection:
     return None
 
 
+def remove_from_all_collections(obj, link_in_scene_collection=False):
+    for col in obj.users_collection:
+        col.objects.unlink(obj)
+    if link_in_scene_collection:
+        bpy.context.scene.collection.objects.link(obj)
+
+
 def get_family_down(col, include_parent=True):
     if include_parent:
         yield col
