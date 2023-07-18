@@ -9,13 +9,17 @@ class GU_OT_select_same_gn(bpy.types.Operator):
     bl_label = "Select Same GN Tree"
     bl_options = {"REGISTER", "UNDO"}
 
-    select_gn_tree: bpy.props.EnumProperty(items=get_geometry_nodes_groups_on_this_object, name="Select")
+    select_gn_tree: bpy.props.EnumProperty(
+        items=get_geometry_nodes_groups_on_this_object, name="Select"
+    )
 
     @classmethod
     def poll(cls, context):
-        return any(
-            m for m in context.active_object.modifiers if m.type == "NODES"
-        ) and len(get_geometry_nodes_groups_on_this_object(None, context)) > 0 
+        return (
+            context.active_object
+            and any(m for m in context.active_object.modifiers if m.type == "NODES")
+            and len(get_geometry_nodes_groups_on_this_object(None, context)) > 0
+        )
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
