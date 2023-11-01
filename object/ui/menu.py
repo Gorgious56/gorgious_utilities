@@ -6,6 +6,10 @@ def draw_toggle_render_object_context(self, _):
     self.layout.operator("object.toggle_render", text="Toggle Render")
 
 
+def draw_toggle_clip_bbox_objects(self, _):
+    self.layout.operator("object.clip_bbox", text="Clip Objects")
+
+
 class GU_Menu_Object(GU_Menu):
     appends = {
         bpy.types.VIEW3D_MT_object_context_menu: draw_toggle_render_object_context,
