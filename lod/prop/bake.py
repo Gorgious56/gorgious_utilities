@@ -39,6 +39,7 @@ class BakeSettings(PropertyGroup):
         row = box.row(align=True)
         mat = obj.data.materials[0]
         column = box.column(align=True)
+        normal_input = False
         try:
             nodes = mat.node_tree.nodes
             bsdf = nodes["Principled BSDF"]
@@ -46,6 +47,8 @@ class BakeSettings(PropertyGroup):
                 if not input.links:
                     continue
                 row = column.row(align=True)
+                if input.name == "Normal":
+                    normal_input = True
                 row.label(text=input.name)
                 row.context_pointer_set("collection_property_holder", self)
                 texture_setting, index = self.get_texture_setting_and_index_for_map(input.name)
@@ -61,3 +64,18 @@ class BakeSettings(PropertyGroup):
                     op_add.item_name = input.name
         except (AttributeError, KeyError):
             pass
+        if not normal_input:
+            row = column.row(align=True)
+            row.label(text="Normal")
+            row.context_pointer_set("collection_property_holder", self)
+            texture_setting, index = self.get_texture_setting_and_index_for_map("Normal")
+            if texture_setting:
+                if texture_setting.active:
+                    texture_setting.draw(row, index)
+                else:
+                    row.prop(texture_setting, "active", icon="LINKED", text="")
+            else:
+                op_add = row.operator("gu.collection_property_operations", icon="LINKED", text="")
+                op_add.collection_property_name = "texture_settings"
+                op_add.operation = "ADD"
+                op_add.item_name = "Normal"
