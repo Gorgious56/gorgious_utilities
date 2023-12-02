@@ -1,0 +1,23 @@
+3D Viewport – VIEW3D_HT_header
+Image Editor – IMAGE_HT_header
+UV Editor – IMAGE_HT_header
+Compositor – NODE_HT_header
+Texture Node Editor – NODE_HT_header
+Geometry Node Editor – NODE_HT_header
+Shader Editor – NODE_HT_header
+Video Squiencer – SEQUENCER_HT_header
+Movie Clip Editor – CLIP_HT_header
+Dope Sheet – DOPESHEET_HT_header
+Time Line – DOPESHEET_HT_header
+Graph Editor – GRAPH_HT_header
+Drivers – GRAPH_HT_header
+Nonlinear Animation – NLA_HT_header
+Text Editor – TEXT_HT_header
+Python Console – CONSOLE_HT_header
+Info – INFO_HT_header
+Outliner – OUTLINER_HT_header
+Properties – PROPERTIES_HT_header
+File Browser – FILEBROWSER_HT_header
+Asset Browser – FILEBROWSER_HT_header
+Spreadsheet – SPREADSHEET_HT_header
+Preferences – USERPREF_HT_header
