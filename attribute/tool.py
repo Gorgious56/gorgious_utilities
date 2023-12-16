@@ -1,10 +1,25 @@
-def get_bmesh_domain(bm, domain):
+def get_bmesh_domain(domain):
     if domain == "POINT":
-        return bm.verts
+        return "verts"
     elif domain == "EDGE":
-        return bm.edges
+        return "edges"
     elif domain == "FACE":
-        return bm.faces
+        return "faces"
+
+
+def get_layer_type(data_type):
+    if data_type == "FLOAT":
+        return "float"
+    elif data_type == "INT":
+        return "int"
+    elif data_type == "STRING":
+        return "string"
+    elif data_type == "FLOAT_VECTOR":
+        return "float_vector"
+    elif data_type == "FLOAT_COLOR":
+        return "float_color"
+    else:
+        raise Exception(f"Data type '{data_type}' not supported")
 
 
 def get_attribute_size_from_value(value):

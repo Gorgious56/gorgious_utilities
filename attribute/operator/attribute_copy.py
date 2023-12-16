@@ -1,18 +1,21 @@
 import bpy
+from gorgious_utilities.attribute.prop import get_attribute_ui
 
 
 class GU_OT_attribute_copy(bpy.types.Operator):
     bl_idname = "gu.attribute_copy"
-    bl_label = "copy attribute from active to selected"
+    bl_label = "copy attribute"
     bl_options = {"UNDO", "REGISTER"}
-    mode: bpy.props.BoolVectorProperty()
-    attribute_name: bpy.props.StringProperty()
+
+    @classmethod
+    def description(cls, context, properties):
+        attribute = context.active_object.data.attributes.active
+        props = context.active_object.GUProps.attribute
+        value = getattr(props, attribute.data_type + "_copy")
+        return f"Currently Stored Value\n{value}"
 
     def execute(self, context):
-        attribute_name = (
-            context.active_object.data.attributes.active.name if self.attribute_name is None else self.attribute_name
-        )
-        bpy.ops.gu.attribute_sample(mode=self.mode, attribute_name=attribute_name)
-        bpy.ops.gu.attribute_set(mode=self.mode, attribute_name=attribute_name)
-
+        attribute = context.active_object.data.attributes.active
+        props = context.active_object.GUProps.attribute
+        setattr(props, attribute.data_type + "_copy", get_attribute_ui(props))
         return {"FINISHED"}
