@@ -40,7 +40,7 @@ class GU_PT_modifier_properties(Panel):
             for inp in tree.inputs:
                 if inp.in_out != "INPUT":
                     continue
-                if inp.identifier == "Socket_0":
+                if inp.identifier in ("Socket_0", "Input_0"):
                     continue  # First input is the source geometry. Don't show that
                 row = col.row(align=True)
                 input_id = inp.identifier
