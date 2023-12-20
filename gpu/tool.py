@@ -3,22 +3,20 @@
 
 import numpy as np
 import bpy
+from bpy.app.handlers import persistent
 import gpu
 import bmesh
 from gpu_extras.batch import batch_for_shader
 from gorgious_utilities.core.preferences.tool import get_preferences
 from gorgious_utilities.attribute.tool import get_attribute_size_and_name_from_attribute
 
-# query = lambda:True
 
-# try:
-#     from blenderbim.tool import blender
-# except ModuleNotFoundError:
-#     pass
-# else:
-#     query = blender.Modifier.
+@persistent
+def load_handler(dummy):
+    MeshDrawer.install(bpy.context)
 
 
+bpy.app.handlers.load_post.append(load_handler)
 
 
 class MeshDrawer:
@@ -64,7 +62,11 @@ class MeshDrawer:
                 except AttributeError:
                     pass
                 else:
-                    if hasattr(prop, "is_editing") and prop.__class__.__name__ != "BIMArrayProperties" and prop.is_editing:
+                    if (
+                        hasattr(prop, "is_editing")
+                        and prop.__class__.__name__ != "BIMArrayProperties"
+                        and prop.is_editing
+                    ):
                         return
 
         self.init_global(context)
