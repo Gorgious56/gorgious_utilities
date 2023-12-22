@@ -1,3 +1,5 @@
+import numpy as np
+
 import bpy
 import bmesh
 
@@ -45,6 +47,19 @@ def get_attribute_ui(self):
 
     bm = bmesh.from_edit_mesh(obj.data)
     active_item = bm.select_history.active
+    if active_item is None:
+        mesh_select_mode = bpy.context.scene.tool_settings.mesh_select_mode
+        # https://blender.stackexchange.com/a/233823/86891
+        if mesh_select_mode[0]:
+            container = bm.verts
+        elif mesh_select_mode[1]:
+            container = bm.edges
+        elif mesh_select_mode[2]:
+            container = bm.faces
+        container_np = np.array(container)
+        selected_np = np.frompyfunc(lambda a: a.select, 1, 1)
+        selected_items = container_np[selected_np(container_np).astype(bool)]
+        active_item = selected_items[0] if len(selected_items) > 0 else None
     if not active_item:
         return self.default_value()
 
