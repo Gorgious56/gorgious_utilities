@@ -227,15 +227,15 @@ class MeshDrawer:
         bmesh.ops.triangulate(
             bm_tri, faces=[bm_tri.faces[i] for i in self.selected_faces]
         )
-        for face in bm_tri.faces:
-            if len(face.verts) != 3:
-                continue
-            self.batch_shader(
-                color_selected_face,
-                -1,
-                "TRIS",
-                {"pos": [self.matrix_world @ v.co for v in face.verts]},
-            )
+        # for face in bm_tri.faces:
+        #     if len(face.verts) != 3:
+        #         continue
+        #     self.batch_shader(
+        #         color_selected_face,
+        #         -1,
+        #         "TRIS",
+        #         {"pos": [self.matrix_world @ v.co for v in face.verts]},
+        #     )
 
         self.batch_shader(
             self.gpu_preferences.color_unselected,
