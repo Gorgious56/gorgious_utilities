@@ -6,8 +6,10 @@ class GU_OT_viewport_setup_overlays(bpy.types.Operator):
     bl_label = "Setup Overlays"
 
     def execute(self, context):
-        view_3d_area = context.area if context.area.type == "VIEW_3D" else next(
-            (a for a in context.screen.areas if a.type == "VIEW_3D"), None
+        view_3d_area = (
+            context.area
+            if context.area.type == "VIEW_3D"
+            else next((a for a in context.screen.areas if a.type == "VIEW_3D"), None)
         )
         if view_3d_area is None:
             return {"CANCELLED"}
@@ -21,5 +23,7 @@ class GU_OT_viewport_setup_overlays(bpy.types.Operator):
         shading.cavity_type = "BOTH"
         shading.cavity_ridge_factor = 1.5
         shading.cavity_valley_factor = 1.5
+
+        shading.show_object_outline = True
 
         return {"FINISHED"}
