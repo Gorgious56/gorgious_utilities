@@ -78,12 +78,12 @@ class EnforceProps(PropertyGroup):
 
     def should_update_enforcement(self):
         if not self.should_enforce_any:
-            return False
+            return self.is_dirty
         if (objects_count := len(self.id_data.all_objects)) == self.last_item_count:
             return self.is_dirty
         else:
             self.last_item_count = objects_count
-            return True
+        return True
 
 
 GUPropsCollection.__annotations__["enforce"] = PointerProperty(type=EnforceProps)
@@ -92,6 +92,11 @@ GUPropsCollection.__annotations__["enforce"] = PointerProperty(type=EnforceProps
 def enforce(scene):
     for col in scene.collection.children_recursive:
         props = col.GUProps.enforce
+        children_recursive = col.children_recursive
+        for col_children in children_recursive:
+            if col_children.GUProps.enforce.is_dirty:
+                props.is_dirty = True
+                break
         if not props.should_update_enforcement():
             continue
         for attr in props.__annotations__:
@@ -102,8 +107,7 @@ def enforce(scene):
             if getattr(props, attr + "_enforce"):
                 for obj in col.all_objects:
                     setattr(obj, attr, getattr(props, attr))
-                    obj.display_type = props.display_type
-            for col_children in col.children_recursive:
+            for col_children in children_recursive:
                 col_children.GUProps.enforce.is_dirty = True
 
         props.is_dirty = False
