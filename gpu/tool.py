@@ -27,9 +27,7 @@ class MeshDrawer:
         if cls.installed:
             cls.uninstall()
         handler = cls()
-        cls.installed = bpy.types.SpaceView3D.draw_handler_add(
-            handler, (context,), "WINDOW", "POST_VIEW"
-        )
+        cls.installed = bpy.types.SpaceView3D.draw_handler_add(handler, (context,), "WINDOW", "POST_VIEW")
 
     @classmethod
     def uninstall(cls):
@@ -51,7 +49,7 @@ class MeshDrawer:
         batch.draw(self.shader)
 
     def __call__(self, context):
-        if not context.scene.GUProps.gpu.draw_mesh:
+        if not hasattr(context.scene, "GUProps") or not context.scene.GUProps.gpu.draw_mesh:
             return
 
         # for blenderBIM modifiers
@@ -105,9 +103,7 @@ class MeshDrawer:
         self.line_shader = gpu.shader.from_builtin("POLYLINE_UNIFORM_COLOR")
         self.line_shader.bind()  # required to be able to change uniforms of the shader
         # POLYLINE_UNIFORM_COLOR specific uniforms
-        self.line_shader.uniform_float(
-            "viewportSize", (context.region.width, context.region.height)
-        )
+        self.line_shader.uniform_float("viewportSize", (context.region.width, context.region.height))
         self.line_shader.uniform_float("lineWidth", 2.0)
 
         # general shader
@@ -176,9 +172,7 @@ class MeshDrawer:
             {"pos": self.unselected_vertices},
         )
         if "VERT" in self.select_mode:
-            self.batch_shader(
-                color_selected, 8, "POINTS", {"pos": self.selected_vertices}
-            )
+            self.batch_shader(color_selected, 8, "POINTS", {"pos": self.selected_vertices})
 
     def process_edges(self):
         for edge in self.bm.edges:
@@ -198,9 +192,7 @@ class MeshDrawer:
             {"pos": self.verts},
             indices=self.unselected_edges,
         )
-        self.batch_shader(
-            color_selected, 3, "LINES", {"pos": self.verts}, indices=self.selected_edges
-        )
+        self.batch_shader(color_selected, 3, "LINES", {"pos": self.verts}, indices=self.selected_edges)
 
     def process_faces(self):
         self.selected_faces = []
@@ -210,23 +202,17 @@ class MeshDrawer:
             if face.hide:
                 continue
             if self.obj_eval.mode == "OBJECT" or not face.select:
-                self.unselected_face_centers.append(
-                    self.matrix_world @ face.calc_center_median()
-                )
+                self.unselected_face_centers.append(self.matrix_world @ face.calc_center_median())
             else:
                 self.selected_faces.append(face.index)
-                self.selected_face_centers.append(
-                    self.matrix_world @ face.calc_center_median()
-                )
+                self.selected_face_centers.append(self.matrix_world @ face.calc_center_median())
 
     def draw_faces(self, color_selected_dot, color_selected_face):
         if not self.selected_faces:
             return
         bm_tri = self.bm.copy()
         bm_tri.faces.ensure_lookup_table()
-        bmesh.ops.triangulate(
-            bm_tri, faces=[bm_tri.faces[i] for i in self.selected_faces]
-        )
+        bmesh.ops.triangulate(bm_tri, faces=[bm_tri.faces[i] for i in self.selected_faces])
         # for face in bm_tri.faces:
         #     if len(face.verts) != 3:
         #         continue
@@ -243,9 +229,7 @@ class MeshDrawer:
             "POINTS",
             {"pos": self.unselected_face_centers},
         )
-        self.batch_shader(
-            color_selected_dot, 8, "POINTS", {"pos": self.selected_face_centers}
-        )
+        self.batch_shader(color_selected_dot, 8, "POINTS", {"pos": self.selected_face_centers})
 
     def add_handle(self, point, handle, selected=True):
         selection_verts, edges = (
@@ -296,9 +280,7 @@ class MeshDrawer:
         indices = np.empty((len(mesh.loop_triangles), 3), "i")
 
         mesh.vertices.foreach_get("co", np.reshape(vertices, len(mesh.vertices) * 3))
-        mesh.loop_triangles.foreach_get(
-            "vertices", np.reshape(indices, len(mesh.loop_triangles) * 3)
-        )
+        mesh.loop_triangles.foreach_get("vertices", np.reshape(indices, len(mesh.loop_triangles) * 3))
 
         size, attr_name = get_attribute_size_and_name_from_attribute(attribute)
         vertex_colors = []

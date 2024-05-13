@@ -2,9 +2,8 @@ import bpy
 
 
 def draw_gpu(self, context):
-    self.layout.prop(
-        context.scene.GUProps.gpu, "draw_mesh", toggle=True, icon="MOD_MESHDEFORM", text=""
-    )
+    if hasattr(context.scene, "GUProps"):
+        self.layout.prop(context.scene.GUProps.gpu, "draw_mesh", toggle=True, icon="MOD_MESHDEFORM", text="")
 
 
 def register():

@@ -6,6 +6,17 @@ from gorgious_utilities.collection.tool import (
 )
 
 
+class GU_PT_collection_enforce(bpy.types.Panel):
+    bl_label = "Enforce"
+    bl_idname = "GU_PT_collection_enforce"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "collection"
+
+    def draw(self, context):
+        context.collection.GUProps.enforce.draw(self.layout)
+
+
 class GU_PT_collection_properties_usage(bpy.types.Panel):
     bl_label = "Usage"
     bl_idname = "GU_PT_collection_properties_usage"
