@@ -14,7 +14,9 @@ class GU_PT_collection_enforce(bpy.types.Panel):
     bl_context = "collection"
 
     def draw(self, context):
-        context.collection.GUProps.enforce.draw(self.layout)
+        self.layout.prop(context.scene.GUProps.collection_enforce, "active", toggle=True, text="Enable Enforcement")
+        if context.scene.GUProps.collection_enforce.active:
+            context.collection.GUProps.enforce.draw(self.layout)
 
 
 class GU_PT_collection_properties_usage(bpy.types.Panel):

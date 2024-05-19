@@ -34,3 +34,5 @@ def register():
 
 def unregister():
     del Object.GUProps
+    del Scene.GUProps
+    del Collection.GUProps

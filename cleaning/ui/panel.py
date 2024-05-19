@@ -1,5 +1,10 @@
 import bpy
 
+try:
+    import blenderbim
+except ModuleNotFoundError:
+    pass
+
 
 class GU_PT_clean_scene(bpy.types.Panel):
     bl_label = "Cleaning"
@@ -8,6 +13,13 @@ class GU_PT_clean_scene(bpy.types.Panel):
     bl_region_type = "WINDOW"
     bl_context = "scene"
     bl_options = {"DEFAULT_CLOSED"}
+
+    @classmethod
+    def poll(cls, context):
+        try:
+            return blenderbim.tool.Blender.is_tab(context, "BLENDER")
+        except:
+            return True
 
     def draw(self, context):
         layout = self.layout
