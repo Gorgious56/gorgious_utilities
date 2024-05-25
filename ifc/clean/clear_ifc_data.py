@@ -14,6 +14,10 @@ class GU_OT_IFC_PCV_store_settings(bpy.types.Operator):
             pass
         collection = next((c for c in bpy.data.collections if c.name.startswith("IfcProject")), None)
         if collection:
+            for obj in collection.all_objects:
+                if not obj.BIMObjectProperties.ifc_definition_id:
+                    if obj.name not in context.scene.collection.objects:
+                        context.scene.collection.objects.link(obj)
             bpy.data.collections.remove(collection)
         bpy.ops.outliner.orphans_purge(do_local_ids=True, do_linked_ids=True, do_recursive=True)
         return {"FINISHED"}
