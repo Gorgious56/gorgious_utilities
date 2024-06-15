@@ -9,7 +9,7 @@ class GU_OT_print_all_users(bpy.types.Operator):
     name: bpy.props.StringProperty()  # type: ignore
 
     def invoke(self, context, event):
-        self.name = context.object.name
+        self.name = context.object.name if context.object else ""
         return context.window_manager.invoke_props_dialog(self)
 
     def execute(self, context):
