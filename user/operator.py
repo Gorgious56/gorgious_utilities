@@ -19,3 +19,4 @@ class GU_OT_print_all_users(bpy.types.Operator):
                 print(f"Data Block: {data_block}")
                 for user in users:
                     print(f"  User: {user.name}")
+        return {"FINISHED"}
