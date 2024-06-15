@@ -18,5 +18,5 @@ class GU_OT_print_all_users(bpy.types.Operator):
             if data_block.name == self.name:
                 print(f"Data Block: {data_block}")
                 for user in users:
-                    print(f"  User: {user.name}")
+                    print(f"  User: {user}")
         return {"FINISHED"}
