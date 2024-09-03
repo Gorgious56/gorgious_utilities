@@ -1,5 +1,5 @@
-# Code inspired by the BlenderBIM addon (C) Dion Moult 2020, 2021, modified by Nathan HILD 2023
-# https://github.com/IfcOpenShell/IfcOpenShell/blob/v0.7.0/src/blenderbim/blenderbim/bim/module/model/opening.py
+# Code inspired by the bonsai addon (C) Dion Moult 2020, 2021, modified by Nathan HILD 2023
+# https://github.com/IfcOpenShell/IfcOpenShell/blob/v0.7.0/src/bonsai/bonsai/bim/module/model/opening.py
 
 import numpy as np
 import bpy
@@ -52,7 +52,7 @@ class MeshDrawer:
         if not hasattr(context.scene, "GUProps") or not context.scene.GUProps.gpu.draw_mesh:
             return
 
-        # for blenderBIM modifiers
+        # for bonsai modifiers
         for obj in context.selected_objects:
             for k in obj.keys():
                 try:
