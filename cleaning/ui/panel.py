@@ -18,7 +18,7 @@ class GU_PT_clean_scene(bpy.types.Panel):
     def poll(cls, context):
         try:
             return bonsai.tool.Blender.is_tab(context, "BLENDER")
-        except (ModuleNotFoundError, AttributeError):
+        except (ModuleNotFoundError, AttributeError, NameError):
             return True
 
     def draw(self, context):
