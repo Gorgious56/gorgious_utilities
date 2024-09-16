@@ -78,6 +78,10 @@ class MeshDrawer:
             # self.draw_attribute()
             self.create_bmesh()
             if self.bm is not None:
+                if (
+                    len(self.bm.verts) > 5000
+                ):  # Mesh is too dense. Don't try to draw it, it will make the computer cry :'(
+                    continue
                 self.process_geometry()
                 self.draw_geometry(context.preferences.themes[0])
         self.shader.bind()
