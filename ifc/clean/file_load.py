@@ -9,6 +9,7 @@ except:
 
 SCENE_COLLECTION_ALIAS = "__SCENE_COLLECTION_ALIAS__afboisdjk"
 
+
 def clear_ifc_data(context):
     col_names_to_guids = defaultdict(list)  # Used to re-map entities to custom collections
     blend_col_names_to_ifc_col_names = defaultdict(list)  # Used to re-map Ifc collections to custom collections
@@ -31,13 +32,13 @@ def clear_ifc_data(context):
                         if col.name.startswith("Ifc"):
                             continue
                         if col == context.scene.collection:
-                            col_names_to_guids[SCENE_COLLECTION_ALIAS] .append(entity.GlobalId)
+                            col_names_to_guids[SCENE_COLLECTION_ALIAS].append(entity.GlobalId)
                         else:
                             col_names_to_guids[col.name].append(entity.GlobalId)
                     objs_to_remove.add(obj)
             else:
                 # Non ifc objects in ifc collections. Move them out before deleting.
-                if len(obj.users_collections) == 1:
+                if len(obj.users_collection) == 1:
                     context.scene.collection.objects.link(obj)
     if objs_to_remove:
         bpy.data.batch_remove(list(objs_to_remove))
