@@ -1,5 +1,6 @@
 import bpy
 from collections import defaultdict
+from pathlib import Path
 
 try:
     import bonsai
@@ -82,6 +83,13 @@ class GU_OT_IFC_reload_file(bpy.types.Operator):
     def execute(self, context):
         filepath = bpy.data.scenes["Scene"].BIMProperties.ifc_file
         col_names_to_guids, blend_col_names_to_ifc_col_names = clear_ifc_data(context)
+        use_relative_path = not Path(filepath).exists()
+        # Replacement for apparent bug in bonsai https://github.com/IfcOpenShell/IfcOpenShell/issues/5407
+        # bpy.ops.bim.load_project(
+        #     "EXEC_DEFAULT", should_start_fresh_session=False, filepath=filepath, use_relative_path=use_relative_path
+        # )
+        if use_relative_path:
+            filepath = str(Path(bpy.data.filepath).parent / filepath)
         bpy.ops.bim.load_project("EXEC_DEFAULT", should_start_fresh_session=False, filepath=filepath)
         self.place_entities_in_custom_collections(context, col_names_to_guids)
         self.link_ifc_collections_to_custom_collections(blend_col_names_to_ifc_col_names)
