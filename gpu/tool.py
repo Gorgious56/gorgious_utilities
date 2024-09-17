@@ -52,8 +52,10 @@ class MeshDrawer:
         if not hasattr(context.scene, "GUProps") or not context.scene.GUProps.gpu.draw_mesh:
             return
 
-        # for bonsai modifiers
+        self.init_global(context)
+        self.bm = None
         for obj in context.selected_objects:
+            self.obj = obj
             for k in obj.keys():
                 try:
                     prop = getattr(bpy.context.object, k)
@@ -65,12 +67,11 @@ class MeshDrawer:
                         and prop.__class__.__name__ != "BIMArrayProperties"
                         and prop.is_editing
                     ):
-                        return
-
-        self.init_global(context)
-        self.bm = None
-        for obj in context.selected_objects:
-            self.obj = obj
+                        continue
+            if (
+                len(self.obj.data.vertices) > 5000
+            ):  # Mesh is too dense. Don't try to draw it, it will make the computer cry :'(
+                continue
             self.init_for_obj(obj)
             if not self.is_obj_valid(obj):
                 continue
@@ -78,10 +79,6 @@ class MeshDrawer:
             # self.draw_attribute()
             self.create_bmesh()
             if self.bm is not None:
-                if (
-                    len(self.bm.verts) > 5000
-                ):  # Mesh is too dense. Don't try to draw it, it will make the computer cry :'(
-                    continue
                 self.process_geometry()
                 self.draw_geometry(context.preferences.themes[0])
         self.shader.bind()

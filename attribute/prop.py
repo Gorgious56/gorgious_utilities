@@ -10,6 +10,7 @@ from bpy.props import (
     StringProperty,
     IntProperty,
     IntVectorProperty,
+    BoolProperty,
 )
 from bpy.types import PropertyGroup
 from gorgious_utilities.core.prop import GUPropsObject
@@ -68,7 +69,6 @@ def get_attribute_ui(self):
 
     domain = getattr(bm, get_bmesh_domain(attribute.domain))
     layer_type = getattr(domain.layers, get_layer_type(attribute.data_type))
-
     layer = layer_type.get(attribute_name)
 
     if attribute.data_type == "STRING":
@@ -92,14 +92,13 @@ def set_attribute_index(self, value):
 
 class AttributeProps(PropertyGroup):
     FLOAT: FloatProperty(get=get_attribute_ui, set=set_attribute_ui)
+    BOOLEAN: BoolProperty(get=get_attribute_ui, set=set_attribute_ui)
     INT: IntProperty(get=get_attribute_ui, set=set_attribute_ui)
     STRING: StringProperty(
         get=get_attribute_ui,
         set=set_attribute_ui,
     )
-    FLOAT_VECTOR: FloatVectorProperty(
-        get=get_attribute_ui, set=set_attribute_ui, size=3
-    )
+    FLOAT_VECTOR: FloatVectorProperty(get=get_attribute_ui, set=set_attribute_ui, size=3)
     FLOAT_COLOR: FloatVectorProperty(
         get=get_attribute_ui,
         set=set_attribute_ui,
@@ -114,18 +113,18 @@ class AttributeProps(PropertyGroup):
     INT_copy: IntProperty()
     STRING_copy: StringProperty()
     FLOAT_VECTOR_copy: FloatVectorProperty(size=3)
-    FLOAT_COLOR_copy: FloatVectorProperty(
-        size=4, subtype="COLOR", min=0, soft_max=1, default=(0, 0, 0, 1)
-    )
+    FLOAT_COLOR_copy: FloatVectorProperty(size=4, subtype="COLOR", min=0, soft_max=1, default=(0, 0, 0, 1))
 
     active_attribute_index_internal: IntVectorProperty(size=3)
-    active_attribute_index: IntProperty(
-        get=get_attribute_index, set=set_attribute_index
-    )
+    active_attribute_index: IntProperty(get=get_attribute_index, set=set_attribute_index)
 
     @property
     def active_attribute(self):
-        return self.id_data.data.attributes[self.active_attribute_index]
+        return (
+            self.id_data.data.attributes[self.active_attribute_index]
+            if self.active_attribute_index < len(self.id_data.data.attributes)
+            else 0
+        )
 
     def default_value(self):
         obj = self.id_data

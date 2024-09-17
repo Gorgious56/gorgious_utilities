@@ -18,6 +18,8 @@ def get_layer_type(data_type):
         return "float_vector"
     elif data_type == "FLOAT_COLOR":
         return "float_color"
+    elif data_type == "BOOLEAN":
+        return "int"
     else:
         raise Exception(f"Data type '{data_type}' not supported")
 
