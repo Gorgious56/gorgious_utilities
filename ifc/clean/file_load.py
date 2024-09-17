@@ -7,6 +7,8 @@ except:
     pass
 
 
+SCENE_COLLECTION_ALIAS = "__SCENE_COLLECTION_ALIAS__afboisdjk"
+
 def clear_ifc_data(context):
     col_names_to_guids = defaultdict(list)  # Used to re-map entities to custom collections
     blend_col_names_to_ifc_col_names = defaultdict(list)  # Used to re-map Ifc collections to custom collections
@@ -28,7 +30,10 @@ def clear_ifc_data(context):
                     for col in obj.users_collection:
                         if col.name.startswith("Ifc"):
                             continue
-                        col_names_to_guids[col.name].append(entity.GlobalId)
+                        if col == context.scene.collection:
+                            col_names_to_guids[SCENE_COLLECTION_ALIAS] .append(entity.GlobalId)
+                        else:
+                            col_names_to_guids[col.name].append(entity.GlobalId)
                     objs_to_remove.add(obj)
             else:
                 # Non ifc objects in ifc collections. Move them out before deleting.
@@ -77,13 +82,16 @@ class GU_OT_IFC_reload_file(bpy.types.Operator):
         filepath = bpy.data.scenes["Scene"].BIMProperties.ifc_file
         col_names_to_guids, blend_col_names_to_ifc_col_names = clear_ifc_data(context)
         bpy.ops.bim.load_project("EXEC_DEFAULT", should_start_fresh_session=False, filepath=filepath)
-        self.place_entities_in_custom_collections(col_names_to_guids)
+        self.place_entities_in_custom_collections(context, col_names_to_guids)
         self.link_ifc_collections_to_custom_collections(blend_col_names_to_ifc_col_names)
         return {"FINISHED"}
 
-    def place_entities_in_custom_collections(self, map):
+    def place_entities_in_custom_collections(self, context, map):
         for col_name, guids in map.items():
-            col = bpy.data.collections[col_name]
+            if col_name == SCENE_COLLECTION_ALIAS:
+                col = context.scene.collection
+            else:
+                col = bpy.data.collections[col_name]
             for guid in guids:
                 entity = bonsai.tool.Ifc.get_entity_by_id(guid)
                 obj = bonsai.tool.Ifc.get_object(entity)

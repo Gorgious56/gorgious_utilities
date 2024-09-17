@@ -55,6 +55,8 @@ class MeshDrawer:
         self.init_global(context)
         self.bm = None
         for obj in context.selected_objects:
+            if not obj.data or not hasattr(obj.data, "vertices"):
+                continue
             self.obj = obj
             for k in obj.keys():
                 try:
