@@ -58,18 +58,6 @@ class MeshDrawer:
             if not obj.data or not hasattr(obj.data, "vertices"):
                 continue
             self.obj = obj
-            for k in obj.keys():
-                try:
-                    prop = getattr(bpy.context.object, k)
-                except AttributeError:
-                    pass
-                else:
-                    if (
-                        hasattr(prop, "is_editing")
-                        and prop.__class__.__name__ != "BIMArrayProperties"
-                        and prop.is_editing
-                    ):
-                        continue
             if (
                 len(self.obj.data.vertices) > 5000
             ):  # Mesh is too dense. Don't try to draw it, it will make the computer cry :'(
