@@ -1,5 +1,6 @@
 import bpy
 from collections import defaultdict
+from pathlib import Path
 
 try:
     import bonsai
@@ -8,6 +9,7 @@ except:
 
 
 SCENE_COLLECTION_ALIAS = "__SCENE_COLLECTION_ALIAS__afboisdjk"
+
 
 def clear_ifc_data(context):
     col_names_to_guids = defaultdict(list)  # Used to re-map entities to custom collections
@@ -31,13 +33,13 @@ def clear_ifc_data(context):
                         if col.name.startswith("Ifc"):
                             continue
                         if col == context.scene.collection:
-                            col_names_to_guids[SCENE_COLLECTION_ALIAS] .append(entity.GlobalId)
+                            col_names_to_guids[SCENE_COLLECTION_ALIAS].append(entity.GlobalId)
                         else:
                             col_names_to_guids[col.name].append(entity.GlobalId)
                     objs_to_remove.add(obj)
             else:
                 # Non ifc objects in ifc collections. Move them out before deleting.
-                if len(obj.users_collections) == 1:
+                if len(obj.users_collection) == 1:
                     context.scene.collection.objects.link(obj)
     if objs_to_remove:
         bpy.data.batch_remove(list(objs_to_remove))
@@ -81,6 +83,13 @@ class GU_OT_IFC_reload_file(bpy.types.Operator):
     def execute(self, context):
         filepath = bpy.data.scenes["Scene"].BIMProperties.ifc_file
         col_names_to_guids, blend_col_names_to_ifc_col_names = clear_ifc_data(context)
+        use_relative_path = not Path(filepath).exists()
+        # Replacement for apparent bug in bonsai https://github.com/IfcOpenShell/IfcOpenShell/issues/5407
+        # bpy.ops.bim.load_project(
+        #     "EXEC_DEFAULT", should_start_fresh_session=False, filepath=filepath, use_relative_path=use_relative_path
+        # )
+        if use_relative_path:
+            filepath = str(Path(bpy.data.filepath).parent / filepath)
         bpy.ops.bim.load_project("EXEC_DEFAULT", should_start_fresh_session=False, filepath=filepath)
         self.place_entities_in_custom_collections(context, col_names_to_guids)
         self.link_ifc_collections_to_custom_collections(blend_col_names_to_ifc_col_names)
