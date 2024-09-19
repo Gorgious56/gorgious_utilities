@@ -15,12 +15,15 @@ def clear_ifc_data(context):
     col_names_to_guids = defaultdict(list)  # Used to re-map entities to custom collections
     blend_col_names_to_ifc_col_names = defaultdict(list)  # Used to re-map Ifc collections to custom collections
 
-    for collection in bpy.data.collections:
-        if collection.name.startswith("Ifc"):
+    col_parent_map = defaultdict(list)
+
+    for parent in bpy.data.collections:
+        if parent.name.startswith("Ifc"):
             continue
-        for children in collection.children:
-            if children.name.startswith("Ifc"):
-                blend_col_names_to_ifc_col_names[collection.name].append(children.name)
+        for child in parent.children:
+            col_parent_map[child].append(parent)
+            if child.name.startswith("Ifc"):
+                blend_col_names_to_ifc_col_names[parent.name].append(child.name)
 
     objs_to_remove = set()
     collection = next((c for c in bpy.data.collections if c.name.startswith("IfcProject")), None)
@@ -29,18 +32,29 @@ def clear_ifc_data(context):
             if obj.BIMObjectProperties.ifc_definition_id:
                 if len(obj.users_collection) > 1:
                     entity = bonsai.tool.Ifc.get_entity(obj)
-                    for col in obj.users_collection:
-                        if col.name.startswith("Ifc"):
-                            continue
-                        if col == context.scene.collection:
-                            col_names_to_guids[SCENE_COLLECTION_ALIAS].append(entity.GlobalId)
-                        else:
-                            col_names_to_guids[col.name].append(entity.GlobalId)
-                    objs_to_remove.add(obj)
+                    if entity:
+                        for col in obj.users_collection:
+                            if col.name.startswith("Ifc"):
+                                continue
+                            if col == context.scene.collection:
+                                col_names_to_guids[SCENE_COLLECTION_ALIAS].append(entity.GlobalId)
+                            else:
+                                col_names_to_guids[col.name].append(entity.GlobalId)
+                            objs_to_remove.add(obj)
+                    else:
+                        collection.objects.unlink(obj)
             else:
                 # Non ifc objects in ifc collections. Move them out before deleting.
                 if len(obj.users_collection) == 1:
                     context.scene.collection.objects.link(obj)
+
+    for child in bpy.data.collections:
+        if not child.name.startswith("Ifc"):
+            continue
+        child.use_fake_user = False
+        for parent in col_parent_map[child]:
+            parent.children.unlink(child)
+
     if objs_to_remove:
         bpy.data.batch_remove(list(objs_to_remove))
 
