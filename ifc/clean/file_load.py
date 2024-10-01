@@ -54,6 +54,29 @@ def clear_ifc_data(context):
         child.use_fake_user = False
         for parent in col_parent_map[child]:
             parent.children.unlink(child)
+        try:
+            bpy.data.collections.remove(child)
+        except ReferenceError:
+            pass
+
+    annotations_to_update = set()
+    for obj in bpy.data.objects:
+        dxf_props = getattr(obj, "DXFExporterProps")
+        if not dxf_props:
+            return
+        annotation = dxf_props.annotation
+        for attribute in annotation.linked_attributes:
+            if attribute.target_global_id:
+                annotations_to_update.add(obj)
+                target = attribute.target_
+                objs_to_remove.add(target)
+                for col in target.users_collection:
+                    try:
+                        bpy.data.collections.remove(col)
+                    except ReferenceError:
+                        pass
+
+
 
     if objs_to_remove:
         bpy.data.batch_remove(list(objs_to_remove))
@@ -63,10 +86,11 @@ def clear_ifc_data(context):
     except AttributeError:
         pass
     else:
-        if collection:
-            bpy.data.collections.remove(collection)
+        # if collection:
+        #     bpy.data.collections.remove(collection)
         bpy.ops.outliner.orphans_purge(do_local_ids=True, do_linked_ids=True, do_recursive=True)
-    return col_names_to_guids, blend_col_names_to_ifc_col_names
+
+    return col_names_to_guids, blend_col_names_to_ifc_col_names, annotations_to_update
 
 
 class GU_OT_IFC_clear_ifc_data(bpy.types.Operator):
@@ -96,7 +120,7 @@ class GU_OT_IFC_reload_file(bpy.types.Operator):
 
     def execute(self, context):
         filepath = bpy.data.scenes["Scene"].BIMProperties.ifc_file
-        col_names_to_guids, blend_col_names_to_ifc_col_names = clear_ifc_data(context)
+        col_names_to_guids, blend_col_names_to_ifc_col_names, annotations_to_update = clear_ifc_data(context)
         use_relative_path = not Path(filepath).exists()
         # Replacement for apparent bug in bonsai https://github.com/IfcOpenShell/IfcOpenShell/issues/5407
         # bpy.ops.bim.load_project(
@@ -107,6 +131,7 @@ class GU_OT_IFC_reload_file(bpy.types.Operator):
         bpy.ops.bim.load_project("EXEC_DEFAULT", should_start_fresh_session=False, filepath=filepath)
         self.place_entities_in_custom_collections(context, col_names_to_guids)
         self.link_ifc_collections_to_custom_collections(blend_col_names_to_ifc_col_names)
+        self.update_annotations(annotations_to_update)
         return {"FINISHED"}
 
     def place_entities_in_custom_collections(self, context, map):
@@ -127,3 +152,7 @@ class GU_OT_IFC_reload_file(bpy.types.Operator):
                 ifc_col = bpy.data.collections[ifc_col_name]
                 if ifc_col_name not in blend_col.children:
                     blend_col.children.link(ifc_col)
+
+    def update_annotations(self, objects):
+        for obj in objects:
+            obj.DXFExporterProps.annotation.update()
