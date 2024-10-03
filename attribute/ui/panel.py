@@ -1,5 +1,6 @@
 import bpy
 from gorgious_utilities.attribute.operator.attribute_viewer import node_group_name
+from gorgious_utilities.attribute.prop import set_attribute_ui
 
 
 class GU_PT_attribute_properties(bpy.types.Panel):
@@ -59,60 +60,58 @@ class GU_PT_attribute_properties(bpy.types.Panel):
             self.layout.label(text="No Attribute in this mode", icon="INFO")
 
 
-# def update_attribute(fields, context, data_type, value_name):
-#     obj = context.object
-#     mesh = obj.data
-#     value = getattr(fields, data_type)
-#     attribute = context.attribute
-#     if value_name == "value":
-#         attribute.data.foreach_set(value_name, [value for _ in range(len(attribute.data))])
-#     else:
-#         values = [value for _ in range(len(attribute.data))]
-#         attribute.data.foreach_set(value_name, [value for vector in values for value in vector])
-#     mesh.update()
+def update_attribute(fields, context, data_type, value_name):
+    obj = context.object
+    mesh = obj.data
+    value = getattr(fields, data_type)
+    if not hasattr(context, "attribute"):
+        return
+    attribute = context.attribute
+    if context.object.mode == "OBJECT":
+        if value_name == "value":
+            attribute.data.foreach_set(value_name, [value for _ in range(len(attribute.data))])
+        else:
+            values = [value for _ in range(len(attribute.data))]
+            attribute.data.foreach_set(value_name, [value for vector in values for value in vector])
+        mesh.update()
+    else:
+        set_attribute_ui(None, value, attribute)
 
 
-# class AttributeSetField(bpy.types.PropertyGroup):
-#     FLOAT: bpy.props.FloatProperty(update=lambda self, context: update_attribute(self, context, "FLOAT", "value"))
-#     INT: bpy.props.IntProperty(update=lambda self, context: update_attribute(self, context, "INT", "value"))
-#     FLOAT_VECTOR: bpy.props.FloatVectorProperty(
-#         update=lambda self, context: update_attribute(self, context, "FLOAT_VECTOR", "vector")
-#     )
-#     FLOAT_COLOR: bpy.props.FloatVectorProperty(
-#         subtype="COLOR",
-#         size=4,
-#         min=0,
-#         soft_max=1,
-#         update=lambda self, context: update_attribute(self, context, "FLOAT_COLOR", "color"),
-#     )
+class AttributeSetField(bpy.types.PropertyGroup):
+    FLOAT: bpy.props.FloatProperty(update=lambda self, context: update_attribute(self, context, "FLOAT", "value"))
+    INT: bpy.props.IntProperty(update=lambda self, context: update_attribute(self, context, "INT", "value"))
+    FLOAT_VECTOR: bpy.props.FloatVectorProperty(
+        update=lambda self, context: update_attribute(self, context, "FLOAT_VECTOR", "vector")
+    )
+    FLOAT_COLOR: bpy.props.FloatVectorProperty(
+        subtype="COLOR",
+        size=4,
+        min=0,
+        soft_max=1,
+        update=lambda self, context: update_attribute(self, context, "FLOAT_COLOR", "color"),
+    )
 
 
-# class GU_PT_attribute_set(bpy.types.Panel):
-#     bl_label = "Attribute Set"
-#     bl_space_type = "PROPERTIES"
-#     bl_region_type = "WINDOW"
-#     bl_context = "data"
+class GU_PT_attribute_set(bpy.types.Panel):
+    bl_label = "Attribute Set"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "data"
 
-#     def draw(self, context):
-#         layout = self.layout
-#         if context.object.type != "MESH" or context.object.mode != "OBJECT":
-#             layout.label(text="Please select a MESH object in OBJECT mode", icon="ERROR")
-#             return
-#         attribute = context.object.data.attributes.active
-#         row = layout.row(align=True)
-#         row.label(text=attribute.name)
-#         row.context_pointer_set("attribute", attribute)
-#         row.prop(context.scene.my_attribute_set_field, attribute.data_type, text="")
-
-
-# def attribute_changed(*args):
-#     print("The active attribute has changed!")
+    def draw(self, context):
+        layout = self.layout
+        if context.object.type != "MESH":
+            layout.label(text="Please select a MESH object", icon="ERROR")
+        elif context.object.mode in ("OBJECT", "EDIT"):
+            attribute = context.object.data.attributes.active
+            row = layout.row(align=True)
+            row.label(text=attribute.name)
+            row.context_pointer_set("attribute", attribute)
+            row.prop(context.scene.my_attribute_set_field, attribute.data_type, text="")
 
 
-
-# def register():
-#     # bpy.utils.register_class(AttributeSetField)
-#     # bpy.utils.register_class(GU_PT_attribute_set)
-#     bpy.types.Scene.my_attribute_set_field = bpy.props.PointerProperty(type=AttributeSetField)
-
-
+def register():
+    # bpy.utils.register_class(AttributeSetField)
+    # bpy.utils.register_class(GU_PT_attribute_set)
+    bpy.types.Scene.my_attribute_set_field = bpy.props.PointerProperty(type=AttributeSetField)

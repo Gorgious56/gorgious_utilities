@@ -21,11 +21,11 @@ from gorgious_utilities.attribute.tool import (
 )
 
 
-def set_attribute_ui(self, value):
+def set_attribute_ui(self, value, attribute=None):
     obj = getattr(self, "id_data", bpy.context.active_object)
     bm = bmesh.from_edit_mesh(obj.data)
 
-    attribute = self.active_attribute
+    attribute = attribute or self.active_attribute
     attribute_name = attribute.name
     domain = getattr(bm, get_bmesh_domain(attribute.domain))
     layer_type = getattr(domain.layers, get_layer_type(attribute.data_type))
