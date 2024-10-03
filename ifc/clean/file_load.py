@@ -69,6 +69,8 @@ def clear_ifc_data(context):
             if attribute.target_global_id:
                 annotations_to_update.add(obj)
                 target = attribute.target_
+                if not target:
+                    continue
                 objs_to_remove.add(target)
                 for col in target.users_collection:
                     try:
