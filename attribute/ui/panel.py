@@ -99,6 +99,10 @@ class GU_PT_attribute_set(bpy.types.Panel):
     bl_region_type = "WINDOW"
     bl_context = "data"
 
+    @classmethod
+    def poll(cls, context):
+        return context.object.type == "MESH"
+
     def draw(self, context):
         layout = self.layout
         if context.object.type != "MESH":
