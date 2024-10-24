@@ -29,7 +29,7 @@ def clear_ifc_data(context):
     collection = next((c for c in bpy.data.collections if c.name.startswith("IfcProject")), None)
     if collection:
         for obj in collection.all_objects:
-            if obj.BIMObjectProperties.ifc_definition_id:
+            if getattr(obj, "BIMObjectProperties", None) and obj.BIMObjectProperties.ifc_definition_id:
                 if len(obj.users_collection) > 1:
                     entity = bonsai.tool.Ifc.get_entity(obj)
                     if entity:
@@ -77,8 +77,6 @@ def clear_ifc_data(context):
                         bpy.data.collections.remove(col)
                     except ReferenceError:
                         pass
-
-
 
     if objs_to_remove:
         bpy.data.batch_remove(list(objs_to_remove))

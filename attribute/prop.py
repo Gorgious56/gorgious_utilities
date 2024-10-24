@@ -21,7 +21,7 @@ from gorgious_utilities.attribute.tool import (
 )
 
 
-def set_attribute_ui(self, value, attribute=None):
+def set_attribute_ui(self, value):
     obj = getattr(self, "id_data", bpy.context.active_object)
     bm = bmesh.from_edit_mesh(obj.data)
 
