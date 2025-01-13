@@ -71,6 +71,8 @@ def get_attribute_ui(self):
     layer_type = getattr(domain.layers, get_layer_type(attribute.data_type))
     layer = layer_type.get(attribute_name)
 
+    if layer is None:
+        return self.default_value()
     if attribute.data_type == "STRING":
         return active_item[layer].decode("utf-8")  # Strings are stored as byte strings.
     return active_item[layer]

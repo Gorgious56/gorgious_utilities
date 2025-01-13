@@ -7,7 +7,7 @@ class GU_OT_python_install_library(bpy.types.Operator):
     bl_idname = "gu.python_install_library"
     bl_label = "Install Python Library / Module"
     bl_options = {"UNDO", "REGISTER"}
-    library_name : bpy.props.StringProperty(name="Module Name")
+    library_name: bpy.props.StringProperty(name="Module Name")
 
     def execute(self, context):
         if self.library_name:
@@ -19,9 +19,9 @@ class GU_OT_python_install_library(bpy.types.Operator):
             # Get lib directory
             lib = Path(py_exec).parent.parent / "lib"
             # Ensure pip is installed
-            subprocess.call([py_exec, "-m", "ensurepip", "--user" ])
+            subprocess.call([py_exec, "-m", "ensurepip", "--user"])
             # Update pip (not mandatory)
-            subprocess.call([py_exec, "-m", "pip", "install", "--upgrade", "pip" ])
+            subprocess.call([py_exec, "-m", "pip", "install", "--upgrade", "pip"])
             # Install packages
-            subprocess.call([py_exec,"-m", "pip", "install", f"--target={str(lib)}", self.library_name])
+            subprocess.call([py_exec, "-m", "pip", "install", "--upgrade", f"--target={str(lib)}", self.library_name])
         return {"FINISHED"}
