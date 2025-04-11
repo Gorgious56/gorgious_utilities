@@ -34,17 +34,18 @@ class GU_PT_attribute_properties(bpy.types.Panel):
                 props,
                 "active_attribute_index",
             )
-            row = layout.row(align=True)
-            row.prop(
-                props,
-                active_attribute.data_type,
-                text=active_attribute.data_type.title(),
-            )
-            row.enabled = context.active_object.mode == "EDIT"
+            if hasattr(props, active_attribute.data_type):
+                row = layout.row(align=True)
+                row.prop(
+                    props,
+                    active_attribute.data_type,
+                    text=active_attribute.data_type.title(),
+                )
+                row.enabled = context.active_object.mode == "EDIT"
 
-            op = row.operator("gu.attribute_set", icon="CHECKMARK", text="")
-            op = row.operator("gu.attribute_copy", icon="COPYDOWN", text="")
-            op = row.operator("gu.attribute_paste", icon="PASTEDOWN", text="")
+                op = row.operator("gu.attribute_set", icon="CHECKMARK", text="")
+                op = row.operator("gu.attribute_copy", icon="COPYDOWN", text="")
+                op = row.operator("gu.attribute_paste", icon="PASTEDOWN", text="")
 
             row = layout.row(align=True)
             if any(m for m in active_object.modifiers if m.name == node_group_name and m.type == "NODES"):
